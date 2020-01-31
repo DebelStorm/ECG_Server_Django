@@ -2,11 +2,6 @@ from rest_framework import serializers
 from .models import Profile
 from django.contrib.auth.models import User
 
-class ChangePasswordSerializer(serializers.Serializer):
-    model = User
-    old_password = serializers.CharField(required=True)
-    new_password = serializers.CharField(required=True)
-
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
