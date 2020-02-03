@@ -1,7 +1,12 @@
 from rest_framework import serializers
 from .models import Patient
 
-class AddPatientSerializer(serializers.ModelSerializer):
+class PatientSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Device
-        fields = ['serial_number']
+        model = Patient
+        fields = ['id', 'patient_name', 'patient_number']
+
+class PatientNoIDSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Patient
+        fields = [ 'patient_name', 'patient_number']
