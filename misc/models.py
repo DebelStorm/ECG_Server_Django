@@ -11,3 +11,6 @@ class user_device_mapping(models.Model):
     # id = models.AutoField()
     device_id_fk = models.ForeignKey(Device, on_delete = models.CASCADE) # or PROTECT
     user_id_fk = models.ForeignKey(User, on_delete = models.CASCADE) # or PROTECT
+
+    def __str__(self):
+        return '%s - %s' % (self.device_id_fk, self.user_id_fk)

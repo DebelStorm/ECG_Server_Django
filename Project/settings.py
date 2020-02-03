@@ -74,7 +74,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-LOGIN_REDIRECT_URL = '/users/'
+LOGIN_REDIRECT_URL = '/devices/'
 
 ROOT_URLCONF = 'Project.urls'
 

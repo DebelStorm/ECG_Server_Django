@@ -12,7 +12,7 @@ urlpatterns = [
     path('', admin.site.urls),
     path('users/',include('user_api.urls')),
     path('devices/',include('device.urls')),
-    path('users/devices/',include('misc.urls')),
+    #path('users/devices/',include('misc.urls')),
 ]
 
 
