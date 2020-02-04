@@ -13,6 +13,7 @@ urlpatterns = [
     path('users/',include('user_api.urls')),
     path('devices/',include('device.urls')),
     path('patients/',include('patient.urls')),
+    path('file/',include('data.urls')),
     #path('users/devices/',include('misc.urls')),
 ]
 

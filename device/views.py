@@ -13,17 +13,16 @@ from rest_framework import status
 
 # Create your views here.
 
-
 # SHOW ALL DEVICES API
 class ShowAllDevices(generics.ListAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
-    permissions = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
 class DetailDevice(generics.RetrieveAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
-    permissions = [permissions.IsAuthenticated, permissions.IsAdminUser, IsSuperUserOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser, IsSuperUserOrReadOnly]
 
 # Working on this
 

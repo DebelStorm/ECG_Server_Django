@@ -5,22 +5,20 @@ from .models import Patient
 from .permissions import AuthenticatedOnly
 from rest_framework import permissions
 
-# Create your views here.
-
 class CreatePatient(generics.CreateAPIView):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
-    permissions = [permissions.IsAuthenticated, AuthenticatedOnly]
+    permission_classes = [permissions.IsAuthenticated]
 
 class ListPatients(generics.ListAPIView):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
-    permissions = [permissions.IsAuthenticated, AuthenticatedOnly]
+    permission_classes = [permissions.IsAuthenticated]
 
 class RetrieveUpdateDeletePatient(generics.RetrieveUpdateDestroyAPIView):
     queryset = Patient.objects.all()
     serializer_class = PatientNoIDSerializer
-    permissions = [permissions.IsAuthenticated, AuthenticatedOnly]
+    permission_classes = [permissions.IsAdminUser]
 
 # Moved Delete Function to RetrieveUpdateDeletePatient
 '''

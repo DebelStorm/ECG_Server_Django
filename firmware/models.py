@@ -9,4 +9,4 @@ class Firmware_Version(models.Model):
     Firmware_version_number = models.CharField(max_length = 100, blank = True, default = ' N/A ')
 
     def __str__(self):
-        return '%s - %s' % (self.device_id_fk, self.Firmware_Version_id)
+        return 'ID: %s, No: %s' % (self.device_id_fk, self.Firmware_Version_id)

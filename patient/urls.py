@@ -5,7 +5,7 @@ from .views import CreatePatient, ListPatients, RetrieveUpdateDeletePatient#, De
 urlpatterns = [
     path('', ListPatients.as_view()),
     path('modify_patient/<int:pk>/', RetrieveUpdateDeletePatient.as_view()),
-    path('add_patient/', CreatePatient.as_view()),
+    path('add_patient/', CreatePatient),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

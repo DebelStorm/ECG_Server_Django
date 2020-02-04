@@ -11,8 +11,9 @@ class Data(models.Model):
     device_id_fk = models.ForeignKey(Device, on_delete = models.CASCADE) # or PROTECT
     user_id_fk = models.ForeignKey(Profile, on_delete = models.CASCADE) # or PROTECT
     patient_id_fk = models.ForeignKey(Patient, on_delete = models.CASCADE) # or PROTECT
-
-    File_name = models.CharField(max_length = 100, blank=True, default='')
-
+    File = models.FileField(upload_to = '~/DJANGO_SERVER_FILES/')
     Start_Time = models.TimeField(auto_now=False, auto_now_add=False, default = timezone.now)
     End_Time = models.TimeField(auto_now=False, auto_now_add=False, default = timezone.now)
+
+    def __str__(self):
+        return 'Patient: %s, User: %s, Device: %s' % (seld.patient_id_fk, self.user_id_fk, self.patient_id_fk)
