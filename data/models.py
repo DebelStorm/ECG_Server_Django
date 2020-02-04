@@ -16,4 +16,4 @@ class Data(models.Model):
     End_Time = models.TimeField(auto_now=False, auto_now_add=False, default = timezone.now)
 
     def __str__(self):
-        return 'Patient: %s, User: %s, Device: %s' % (seld.patient_id_fk, self.user_id_fk, self.patient_id_fk)
+        return 'Patient: %s , User: %s , Device: %s' % (seld.patient_id_fk, self.user_id_fk, self.patient_id_fk)
