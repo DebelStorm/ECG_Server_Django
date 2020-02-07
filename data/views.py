@@ -8,15 +8,18 @@ from device.models import Device
 from patient.models import Patient
 from .models import Data
 from rest_framework import status
+from rest_framework.response import Response
 
 # Create your views here.
 
 class post_data_forms(APIView):
-    parser_classes = (JSONParser, FormParser, MultiPartParser, FileUploadParser, )
+    parser_classes = (MultiPartParser,)
     def post(self, request, *args, **kwargs):
         if(not request.user.is_authenticated):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         serializer = DataUploadSerializer(data = request.data)
+        if(not serializer.is_valid()):
+            return Response(status = status.HTTP_409_CONFLICT)
         current_user = request.user
         if(Device.objects.filter(serial_number = serializer.validated_data.get('device_sl_no')).exists() and Patient.objects.get(patient_number = serializer.validated_data.get('patient_no')).exists()):
             current_device = Device.objects.get(serial_number = serializer.validated_data.get('device_sl_no'))

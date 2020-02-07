@@ -24,8 +24,8 @@ class DetailDevice(generics.RetrieveAPIView):
     serializer_class = DeviceSerializer
     permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser, IsSuperUserOrReadOnly]
 
-# Working on this
 
+# Update Device API
 @api_view(['POST'])
 def update_device_settings(request):
     if(not request.user.is_authenticated):
