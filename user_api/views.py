@@ -81,24 +81,65 @@ class UserDetailView(APIView):
             return Response(serializer.errors)
 
 class ForgotPassword(APIView):
-    def post(self, request):
+
+    #serializer_class = ForgotPasswordSerializer
+
+    def post(self, request, *args, **kwargs):
+
         serializer = ForgotPasswordSerializer(data = request.data)
+
         if(serializer.is_valid()):
             email = serializer.validated_data.get('email')
             set = User.objects.filter(username = serializer.validated_data.get('username'))
+
             if(set.exists() and (len(set) == 1)):
+
                 current_user = User.objects.get(username = serializer.validated_data.get('username'))
                 user_mail = current_user.email
+
                 if(user_mail == email):
-                    hotp = pyotp.HOTP(base32_lib.generate())
-                    key = hotp.at(random.randint(1,1000))
-                    current_user.profile.OTP = key
-                    current_user.profile.save()
-                    try:
-                        send_mail("OTP", key, EMAIL_HOST_USER, [user_mail], fail_silently=False,)
-                    except BadHeaderError:
-                        return Response("Invalid header found.")
-                    return Response("SUCCESS", status = status.HTTP_200_OK)
-                return Response("Check username/email", status = status.HTTP_406_NOT_ACCEPTABLE)
+
+                    OTP = serializer.validated_data.get('OTP')
+                    OTP_req = current_user.profile.OTP
+
+                    if(OTP == OTP_req):
+
+                        new_pass1 = serializer.validated_data.get('new_password')
+                        new_pass2 = serializer.validated_data.get('new_password_confirm')
+
+                        if((new_pass1 == None) or (new_pass2 == None)):
+
+                            return Response("Please enter both new_password and new_password_confirm.", status = status.HTTP_406_NOT_ACCEPTABLE)
+
+                        elif(new_pass1 == new_pass2):
+
+                            current_user.set_password(new_pass1)
+                            current_user.save()
+
+                            hotp = pyotp.HOTP(pyotp.random_base32())
+                            key = hotp.at(100)
+                            current_user.profile.OTP = key
+                            current_user.profile.save()
+
+                            return Response("Password Updated Successfully.", status = status.HTTP_200_OK)
+                    elif(OTP == None):
+
+                        hotp = pyotp.HOTP(pyotp.random_base32())
+                        key = hotp.at(100)
+                        current_user.profile.OTP = key
+                        current_user.profile.save()
+                        try:
+                            send_mail("OTP", key, EMAIL_HOST_USER, [user_mail], fail_silently=False,)
+                        except BadHeaderError:
+                            return Response("Invalid header found.")
+                        return Response("OTP Sent to registered mail.", status = status.HTTP_200_OK)
+
+                    else:
+                        return Response("INVALID OTP", status = status.HTTP_406_NOT_ACCEPTABLE)
+                else:
+
+                    return Response("Check username/email", status = status.HTTP_406_NOT_ACCEPTABLE)
+
             return Response("FAIL", status = status.HTTP_404_NOT_FOUND)
-        return Response("FAIL", status = status.HTTP_406_NOT_ACCEPTABLE)
+
+        return Response(serializer.errors, status = status.HTTP_406_NOT_ACCEPTABLE)

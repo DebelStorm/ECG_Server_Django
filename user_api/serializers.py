@@ -33,3 +33,6 @@ class UserUpdateSerializer(serializers.Serializer):
 class ForgotPasswordSerializer(serializers.Serializer):
     username = serializers.CharField(max_length = 50, required = True)
     email = serializers.EmailField(max_length = 50, required = True)
+    OTP = serializers.CharField(max_length = 6, required = False)
+    new_password = serializers.CharField(required = False)
+    new_password_confirm = serializers.CharField(required = False)

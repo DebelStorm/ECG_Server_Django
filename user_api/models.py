@@ -9,4 +9,4 @@ class Profile(models.Model):
     OTP = models.CharField(blank = False, default = '000000', max_length = 6)
 
     def __str__(self):
-        return self.user
+        return self.user.username
