@@ -32,6 +32,14 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # Application definition
 
+#DataFlair
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = "ECG.IITH.API@gmail.com"
+EMAIL_HOST_PASSWORD = "IITHECG@2020"
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -41,6 +49,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_otp',
+    'django_otp.plugins.otp_totp',
+    'django_otp.plugins.otp_static',
     #'api_main.apps.ApiMainConfig',
     'user_api',
     'data',
@@ -76,7 +87,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-LOGIN_REDIRECT_URL = '/devices/'
+LOGIN_REDIRECT_URL = '/api/update_user'
+LOGOUT_REDIRECT_URL = '/api/login'
+LOGIN_URL = '/api/login'
+LOGOUT_URL = '/api/logout'
 
 ROOT_URLCONF = 'Project.urls'
 

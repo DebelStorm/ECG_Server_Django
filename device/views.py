@@ -44,18 +44,18 @@ def update_device_settings(request):
                     new_Mac_id = serializer.validated_data.get('Mac_id')
                     new_Num_of_Leads  = serializer.validated_data.get('Num_of_Leads')
 
-                    if(new_device_name != "NA"):
+                    if(new_device_name != None):
                         device_to_be_updated.device_name = new_device_name
-                    if(new_Mac_id != "NA"):
+                    if(new_Mac_id != None):
                         device_to_be_updated.Mac_id = new_Mac_id
-                    if(new_Num_of_Leads != -1):
+                    if(new_Num_of_Leads != None):
                         device_to_be_updated.Num_of_Leads = new_Num_of_Leads
 
                     device_firmware_object = Firmware_Version.objects.get(device_id_fk = device_to_be_updated)
 
-                    if(new_Firmware_Version_id != "NA"):
+                    if(new_Firmware_Version_id != None):
                         device_firmware_object.Firmware_Version_id = new_Firmware_Version_id
-                    if(new_Firmware_version_number != "NA"):
+                    if(new_Firmware_version_number != None):
                         device_firmware_object.Firmware_version_number = new_Firmware_version_number
 
                     device_to_be_updated.save()
