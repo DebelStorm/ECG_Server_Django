@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .serializers import UserShowOnlySerializer, UserUpdateSerializer, ForgotPasswordSerializer
+from .serializers import UserShowOnlySerializer, UserCreateSerializer, UserUpdateSerializer, ForgotPasswordSerializer
 from rest_framework import generics, permissions, status
 from user_api.permissions import IsOwnerOrSuperUser, IsSuperUserOnly
 from rest_framework.response import Response
@@ -28,16 +28,40 @@ class UserListView(generics.ListAPIView):
 
 class UserCreateView(generics.CreateAPIView):
     queryset = User.objects.all()
-    serializer_class = UserShowOnlySerializer
+    serializer_class = UserCreateSerializer
     permission_classes = [IsSuperUserOnly]
+    parser_classes = (JSONParser, MultiPartParser,)
 
-'''
-class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = User.objects.all()
-    #lookup_field = "username"
-    serializer_class = UserShowOnlySerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrSuperUser]
-'''
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data = request.data)
+        if(serializer.is_valid()):
+            Password = serializer.validated_data.get('password')
+            Confirm_Password = serializer.validated_data.get('Confirm_Password')
+            if(Confirm_Password == Password):
+                #serializer.create(serializer.validated_data)
+                phone_number = serializer.validated_data.get('phone_number')
+                username = serializer.validated_data.get('username')
+                password = serializer.validated_data.get('password')
+                first_name = serializer.validated_data.get('first_name')
+                last_name = serializer.validated_data.get('last_name')
+                email = serializer.validated_data.get('email')
+                user = User.objects.create_user(username = username, password = password, first_name = first_name, last_name = last_name, email = email)
+                if(phone_number != None):
+                    user.profile = Profile.objects.create(user = user, phone_number = phone_number)
+                else:
+                    user.profile = None
+                user.save()
+                return Response("SUCCESS", status = status.HTTP_200_OK)
+            else:
+                return Response("Check Password and Confirm Password", status = status.HTTP_406_NOT_ACCEPTABLE)
+        return Response(serializer.errors, status = status.HTTP_406_NOT_ACCEPTABLE)
+
+    def perform_create(self, serializer):
+        try:
+            if(serializer.is_valid()):
+                serializer.save()
+        except:
+            pass
 
 class UserDetailView(APIView):
     parser_classes = (JSONParser,)
@@ -122,6 +146,11 @@ class ForgotPassword(APIView):
                             current_user.profile.save()
 
                             return Response("Password Updated Successfully.", status = status.HTTP_200_OK)
+
+                        else:
+
+                            return Response("Password and Confirm Password not same", status = status.HTTP_200_OK)
+
                     elif(OTP == None):
 
                         hotp = pyotp.HOTP(pyotp.random_base32())
