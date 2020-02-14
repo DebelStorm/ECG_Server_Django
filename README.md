@@ -93,7 +93,7 @@ Json Format
 
 ### Forgot Password
 
-This Request has two modes. 
+This Request has two modes.
 * Mode 1 - Request OTP
 * Mode 2 - Change Password using OTP
 
@@ -139,7 +139,7 @@ POST Request.
 
 Local host link : http://127.0.0.1/api/add_device
 
-User Authentication Required. 
+User Authentication Required.
 
 Json Format
 ```
@@ -150,7 +150,7 @@ Json Format
     "Num_of_Leads": ""
 }
 ```
-Creates a new device object and a map to user_device_map table. If device is already present, only the map will be created. 
+Creates a new device object and a map to user_device_map table. If device is already present, only the map will be created.
 
 ### Delete Device
 
@@ -158,7 +158,7 @@ POST Request.
 
 Local host link : http://127.0.0.1/api/delete_device
 
-User Authentication Required. 
+User Authentication Required.
 
 Json Format
 ```
@@ -174,7 +174,7 @@ POST Request.
 
 Local host link : http://127.0.0.1/api/update_device_settings
 
-User Authentication Required. 
+User Authentication Required.
 
 Json Format
 ```
@@ -195,7 +195,7 @@ POST Request.
 
 Local host link : http://127.0.0.1/api/add_patient
 
-User Authentication Required. 
+User Authentication Required.
 
 Json Format
 
@@ -212,11 +212,12 @@ POST Request.
 
 Local host link : http://127.0.0.1/api/post_data
 
-User Authentication Required. 
+User Authentication Required.
 
 Form Format
 
 Content-Type : multipart/form-data
+
 ```
 data_id - ""
 device_sl_no - ""
@@ -236,7 +237,7 @@ GET Request.
 
 Local host link : http://127.0.0.1/api/get_data
 
-User Authentication Required. 
+User Authentication Required.
 
 ```
 {
@@ -247,6 +248,3 @@ User Authentication Required.
 "data_id" wil uniquely identify a file.
 
 Downloads the file with id "data_id".
-
-
-
