@@ -13,7 +13,7 @@ class DeleteSerializer(serializers.Serializer):
 class UpdateSerializer(serializers.Serializer):
     serial_number = serializers.CharField(max_length = 100, required = True)
     device_name = serializers.CharField(max_length = 100, required = False)
-    Firmware_Version_id = serializers.CharField(max_length = 100, required = False)
+    Firmware_version_id = serializers.CharField(max_length = 100, required = False)
     Firmware_version_number = serializers.CharField(max_length = 100, required = False)
     Mac_id = serializers.CharField(max_length = 100, required = False)
     Num_of_Leads = serializers.IntegerField(required = False)

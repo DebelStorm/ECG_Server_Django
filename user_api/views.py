@@ -75,7 +75,7 @@ class UserDetailView(APIView):
 
     def patch(self, request):
         if(not request.user.is_authenticated):
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+            return Response("FAIL", status=status.HTTP_401_UNAUTHORIZED)
         else:
             serializer = UserUpdateSerializer(data = request.data)
             if(serializer.is_valid()):
@@ -101,7 +101,7 @@ class UserDetailView(APIView):
 
                 current_user.save()
                 current_user.profile.save()
-                return Response(current_user)
+                return Response("SUCCESS", status = status.HTTP_200_OK)
             return Response(serializer.errors)
 
 class ForgotPassword(APIView):

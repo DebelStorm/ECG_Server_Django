@@ -8,3 +8,6 @@ class DataUploadSerializer(serializers.Serializer):
     File = serializers.FileField(required = True)
     Start_Time = serializers.TimeField(format='%H:%M:%S')
     End_Time = serializers.TimeField(format='%H:%M:%S')
+
+class DataDownloadSerializer(serializers.Serializer):
+    data_id = serializers.CharField(max_length = 50, required = True)
