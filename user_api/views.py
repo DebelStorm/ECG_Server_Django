@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .serializers import UserShowOnlySerializer, UserCreateSerializer, UserUpdateSerializer, ForgotPasswordSerializer
+from .serializers import UserShowOnlySerializer, UserCreateSerializer, UserUpdateSerializer, ForgotPasswordSerializer, LoginSerializer, LogoutSerializer
 from rest_framework import generics, permissions, status
 from user_api.permissions import IsOwnerOrSuperUser, IsSuperUserOnly
 from rest_framework.response import Response
@@ -14,12 +14,53 @@ from django.core.mail import send_mail, BadHeaderError
 from Project.settings import EMAIL_HOST_USER, SECRET_KEY
 from django.http import HttpResponseRedirect
 import pyotp, random, base32_lib
+from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
+
 # Create your views here.
 
 from django.contrib.auth.decorators import login_required
 
 def test_redirect(request):
     return HttpResponseRedirect("api/login")
+
+class UserLoginView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = LoginSerializer(data = request.data)
+        if(serializer.is_valid()):
+            username = serializer.validated_data.get("username")
+            password = serializer.validated_data.get("password")
+            user = authenticate(username = username, password = password)
+            if user is not None:
+                token_set = Token.objects.filter(user = user)
+                if(token_set.exists()):
+                    token = Token.objects.get(user = user)
+                    token.delete()
+                    new_token = Token.objects.create(user = user)
+                    token = new_token
+                else:
+                    token = Token.objects.create(user = user)
+                return Response(token.key, status = status.HTTP_200_OK)
+            else:
+                return Response("Login Failed. Check username/password.", status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+
+class UserLogoutView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = LogoutSerializer(data = request.data)
+        if(serializer.is_valid()):
+            session_id = serializer.validated_data.get("session_id")
+            token_set = Token.objects.filter(key = session_id)
+            if(token_set.exists()):
+                token_object = Token.objects.get(key = session_id)
+                token_object.delete()
+                return Response("SUCCESS", status = status.HTTP_200_OK)
+            else:
+                return Response("Already Logged Out.", status = status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+
 
 class UserListView(generics.ListAPIView):
     queryset = User.objects.all()

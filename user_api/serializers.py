@@ -7,6 +7,18 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ['phone_number']
 
+class LoginSerializer(serializers.Serializer):
+    class Meta:
+        model = User
+        fields = ['username', 'password']
+        extra_kwargs =  {
+                            'username' : {'required' : True},
+                            'password' : {'required' : True, 'write_only' : True, 'style' : {'input_type': 'password', 'placeholder': 'Password'}}
+                        }
+
+class LogoutSerializer(serializers.Serializer):
+    session_id = serializers.CharField(max_length = 100, required = True)
+
 class UserCreateSerializer(serializers.ModelSerializer):
     phone_number = serializers.CharField(max_length = 20, required = False)
     Confirm_Password = serializers.CharField(write_only = True, required = True, style = {'input_type': 'password', 'placeholder': 'Password'})
