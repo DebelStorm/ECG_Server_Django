@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import generics
 from rest_framework import permissions
 from .models import Device
-from .serializers import DeviceSerializer, DeleteSerializer, UpdateSerializer
+from .serializers import DeviceSerializer, DeleteSerializer, UpdateSerializer, AddDeviceSerializer
 from .permissions import IsSuperUserOrReadOnly
 from misc.models import user_device_mapping
 from firmware.models import Firmware_Version
@@ -10,6 +10,7 @@ from django.contrib.auth.models import User
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 
 # Create your views here.
 
@@ -28,19 +29,25 @@ class DetailDevice(generics.RetrieveAPIView):
 # Update Device API
 @api_view(['POST'])
 def update_device_settings(request):
-    if(not request.user.is_authenticated):
-        return Response("USER AUTH REQUIRED", status=status.HTTP_401_UNAUTHORIZED)
-    else:
-        if(request.method == 'POST'):
-            serializer = UpdateSerializer(data = request.data)
-            if(serializer.is_valid()):
+    if(request.method == 'POST'):
+        serializer = UpdateSerializer(data = request.data)
+        if(serializer.is_valid()):
+            session_id = serializer.validated_data.get("session_id")
+            token_set = Token.objects.filter(key = session_id)
+
+            if(token_set.exists()):
+
+                token_object = Token.objects.get(key = session_id)
+                current_user = token_object.user
+
                 set = Device.objects.filter(serial_number = serializer.validated_data.get('serial_number'))
-                if(set.exists() and (len(set) == 1)):
+
+                if(set.exists()):
 
                     device_to_be_updated = Device.objects.get(serial_number = serializer.validated_data.get('serial_number'))
-                    set2 = user_device_mapping.objects.filter(user_id_fk = request.user, device_id_fk = device_to_be_updated)
+                    set2 = user_device_mapping.objects.filter(user_id_fk = current_user, device_id_fk = device_to_be_updated)
 
-                    if(set2.exists() or request.user.is_staff):
+                    if(set2.exists() or current_user.is_staff):
 
                         new_device_name = serializer.validated_data.get('device_name')
                         new_Firmware_Version_id = serializer.validated_data.get('Firmware_version_id')
@@ -69,54 +76,86 @@ def update_device_settings(request):
 
                     return Response("UNAUTHORIZED", status=status.HTTP_401_UNAUTHORIZED)
 
-                return Response("FAIL", status=status.HTTP_409_CONFLICT)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response("DEVICE DOES NOT EXIST", status=status.HTTP_400_BAD_REQUEST)
+
+            return Response("INVALID SESSION", status=status.HTTP_401_UNAUTHORIZED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 ## DELETE DEVICE API
 @api_view(['POST'])
 def delete_device(request):
-    if(not request.user.is_authenticated):
-        return Response("USER AUTH REQUIRED",status=status.HTTP_401_UNAUTHORIZED)
-    else:
-        if(request.method == 'POST'):
-            serializer = DeleteSerializer(data = request.data)
-            if(serializer.is_valid()):
+    if(request.method == 'POST'):
+        serializer = DeleteSerializer(data = request.data)
+        if(serializer.is_valid()):
+            session_id = serializer.validated_data.get("session_id")
+            token_set = Token.objects.filter(key = session_id)
+
+            if(token_set.exists()):
+
+                token_object = Token.objects.get(key = session_id)
+                current_user = token_object.user
                 set = Device.objects.filter(serial_number = serializer.validated_data.get('serial_number'))
-                if(set.exists() and (len(set) == 1)):
-                    current_user = request.user
+
+                if(set.exists()):
+
                     device_to_be_deleted = Device.objects.get(serial_number = serializer.validated_data.get('serial_number'))
                     set2 = user_device_mapping.objects.filter(user_id_fk = current_user, device_id_fk = device_to_be_deleted)
-                    if(set2.exists() or request.user.is_staff):
+
+                    if(set2.exists() or current_user.is_staff):
+
                         device_to_be_deleted.delete()
                         return Response("SUCCESS", status=status.HTTP_200_OK)
-                    return Response("UNAUTHORIZED", status=status.HTTP_401_UNAUTHORIZED)
-                return Response("FAIL", status=status.HTTP_409_CONFLICT)
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
+                    return Response("UNAUTHORIZED", status=status.HTTP_401_UNAUTHORIZED)
+
+                return Response("DEVICE DOES NOT EXIST", status=status.HTTP_400_BAD_REQUEST)
+
+            return Response("INVALID SESSION", status=status.HTTP_401_UNAUTHORIZED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 ##  ADD DEVICE API
 @api_view(['POST'])
 def add_device(request):
-    if(not request.user.is_authenticated):
-        return Response("USER AUTH REQUIRED",status=status.HTTP_401_UNAUTHORIZED)
-    else:
-        if(request.method == 'POST'):
-            serializer = DeviceSerializer(data = request.data)
-            if(serializer.is_valid()):
-                # Check if the Device already exists or not
-                if(not Device.objects.filter(device_name = serializer.validated_data.get('device_name')).exists()):
-                    new_device = serializer.save()
+    if(request.method == 'POST'):
+        serializer = AddDeviceSerializer(data = request.data)
+        if(serializer.is_valid()):
+
+            session_id = serializer.validated_data.get("session_id")
+            token_set = Token.objects.filter(key = session_id)
+
+            if(token_set.exists()):
+
+                token_object = Token.objects.get(key = session_id)
+                current_user = token_object.user
+
+                if(not Device.objects.filter(serial_number = serializer.validated_data.get('serial_number')).exists()):
+
+                    device_name = serializer.validated_data.get("device_name")
+                    if(device_name is None):
+                        device_name = "DefaultDevice"
+                    serial_number = serializer.validated_data.get("serial_number")
+                    Mac_id = serializer.validated_data.get("Mac_id")
+                    if(Mac_id is None):
+                        Mac_id = "N/A"
+                    Num_of_Leads = serializer.validated_data.get("Num_of_Leads")
+                    if(Num_of_Leads is None):
+                        Num_of_Leads = 12
+                    new_device = Device(device_name = device_name, serial_number = serial_number, Mac_id = Mac_id, Num_of_Leads = Num_of_Leads)
+                    new_device.save()
                     add_firmware = Firmware_Version(device_id_fk = new_device)
                     add_firmware.save()
 
-                new_device = Device.objects.get(device_name = serializer.validated_data.get('device_name'))
-                #new_device_id = new_device.id
-                current_user = User.objects.get(username = request.user.get_username())
-                #current_user_id = current_user.id
-                new_u_d_map = user_device_mapping(user_id_fk = current_user, device_id_fk = new_device)
-                # Check if already exists
+                new_device = Device.objects.get(serial_number = serializer.validated_data.get('serial_number'))
+
                 if(not user_device_mapping.objects.filter(user_id_fk = current_user, device_id_fk = new_device).exists()):
+
+                    new_u_d_map = user_device_mapping(user_id_fk = current_user, device_id_fk = new_device)
                     new_u_d_map.save()
+
                 return Response("SUCCESS", status=status.HTTP_201_CREATED)
-            else:
-                return Response("FAIL", status=status.HTTP_400_BAD_REQUEST)
+
+            return Response("INVALID AUTH", status=status.HTTP_401_UNAUTHORIZED)
+
+        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)

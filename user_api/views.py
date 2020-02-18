@@ -70,7 +70,7 @@ class UserListView(generics.ListAPIView):
 class UserCreateView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserCreateSerializer
-    permission_classes = [IsSuperUserOnly]
+    #permission_classes = [IsSuperUserOnly]
     parser_classes = (JSONParser, MultiPartParser,)
 
     def post(self, request, *args, **kwargs):
@@ -107,20 +107,28 @@ class UserCreateView(generics.CreateAPIView):
 class UserDetailView(APIView):
     parser_classes = (JSONParser,)
 
+    '''
     def get(self, request):
         if(not request.user.is_authenticated):
             return Response("FAIL", status=status.HTTP_401_UNAUTHORIZED)#status=status.HTTP_401_UNAUTHORIZED)
         else:
             serializer = UserShowOnlySerializer(request.user)
             return Response(serializer.data)
+    '''
 
     def patch(self, request):
-        if(not request.user.is_authenticated):
-            return Response("FAIL", status=status.HTTP_401_UNAUTHORIZED)
-        else:
-            serializer = UserUpdateSerializer(data = request.data)
-            if(serializer.is_valid()):
-                current_user = request.user
+
+        serializer = UserUpdateSerializer(data = request.data)
+
+        if(serializer.is_valid()):
+
+            session_id = serializer.validated_data.get("session_id")
+            token_set = Token.objects.filter(key = session_id)
+
+            if(token_set.exists()):
+
+                token_object = Token.objects.get(key = session_id)
+                current_user = token_object.user
                 profile = current_user.profile
                 new_user_name = serializer.validated_data.get('username')
                 new_first_name = serializer.validated_data.get('first_name')
@@ -143,12 +151,14 @@ class UserDetailView(APIView):
                 current_user.save()
                 current_user.profile.save()
                 return Response("SUCCESS", status = status.HTTP_200_OK)
-            return Response(serializer.errors)
+
+            return Response("FAIL", status=status.HTTP_401_UNAUTHORIZED)
+
+        return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+
 
 class ForgotPassword(APIView):
-
     #serializer_class = ForgotPasswordSerializer
-
     def post(self, request, *args, **kwargs):
 
         serializer = ForgotPasswordSerializer(data = request.data)

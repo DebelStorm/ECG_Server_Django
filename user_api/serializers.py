@@ -44,6 +44,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 class UserShowOnlySerializer(serializers.ModelSerializer):
     profile = ProfileSerializer()
     #user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    session_id = serializers.CharField(max_length = 100, required = True)
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'profile']
@@ -57,6 +58,7 @@ class UserShowOnlySerializer(serializers.ModelSerializer):
         return user
 
 class UserUpdateSerializer(serializers.Serializer):
+    session_id = serializers.CharField(max_length = 100, required = True)
     username = serializers.CharField(max_length = 50, required = False)
     first_name = serializers.CharField(max_length = 50, required = False)
     last_name = serializers.CharField(max_length = 50, required = False)

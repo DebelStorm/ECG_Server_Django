@@ -2,11 +2,15 @@ from rest_framework import serializers
 from .models import Patient
 
 class PatientSerializer(serializers.ModelSerializer):
+    session_id = serializers.CharField(max_length = 100, required = True)
     class Meta:
         model = Patient
-        fields = ['id', 'patient_name', 'patient_number']
-
-class PatientNoIDSerializer(serializers.ModelSerializer):
+        fields = ['session_id', 'patient_name', 'patient_number']
+        extra_kwargs =  {
+                            'patient_name' : {'required' : True},
+                            'patient_number' : {'required' : True}
+                        }
+class PatientListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
-        fields = [ 'patient_name', 'patient_number']
+        fields = ['patient_name', 'patient_number']
