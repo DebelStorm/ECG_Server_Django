@@ -123,7 +123,7 @@ Json Format
 
 ### Update User
 
-PATCH Request.
+POST Request.
 
 Local host link : http://127.0.0.1/api/update_user
 
