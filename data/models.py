@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 
 class Data(models.Model):
     # data_id = models.AutoField() # Auto Generated
-    data_file_id = models.CharField(max_length = 50, unique = True, default = "0001")
+    data_file_id = models.CharField(max_length = 50, unique = True)
     device_id_fk = models.ForeignKey(Device, on_delete = models.CASCADE) # or PROTECT
     user_id_fk = models.ForeignKey(User, on_delete = models.CASCADE) # or PROTECT
     patient_id_fk = models.ForeignKey(Patient, on_delete = models.CASCADE) # or PROTECT

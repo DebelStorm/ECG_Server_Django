@@ -30,25 +30,60 @@ setuptools          45.0.0
 six                 1.14.0    
 sqlparse            0.3.0     
 urllib3             1.25.7    
-wheel               0.33.6  
+wheel               0.33.6   
 ```
 ## APIs
 
-* [Create User](https://github.com/DebelStorm/ECG_Server_Django/new/master?readme=1#create-user) : http://127.0.0.1/api/create_user
-* [Update User](https://github.com/DebelStorm/ECG_Server_Django/new/master?readme=1#update-user) : http://127.0.0.1/api/update_user
-* [Forgot Password](https://github.com/DebelStorm/ECG_Server_Django/new/master?readme=1#forgot-password) : http://127.0.0.1/api/forgot_password
-* [Add Device](https://github.com/DebelStorm/ECG_Server_Django/new/master?readme=1#add-device) : http://127.0.0.1/api/add_device
-* [Delete Device](https://github.com/DebelStorm/ECG_Server_Django/new/master?readme=1#delete-device) : http://127.0.0.1/api/delete_device
-* [Update Device Settings](https://github.com/DebelStorm/ECG_Server_Django/new/master?readme=1#update-device-settings) : http://127.0.0.1/api/update_device_settings
-* [Add Patient](https://github.com/DebelStorm/ECG_Server_Django/new/master?readme=1#add-patient) : http://127.0.0.1/api/add_patient
-* [Post File](https://github.com/DebelStorm/ECG_Server_Django/new/master?readme=1#post-data) : http://127.0.0.1/api/post_data
-* [Download File](https://github.com/DebelStorm/ECG_Server_Django/new/master?readme=1#get-data) : http://127.0.0.1/api/get_data
+* [Login User](#login-user) : http://127.0.0.1/api/login
+* [Logout User](#logout-user) : http://127.0.0.1/api/logout
+* [Create User](#create-user) : http://127.0.0.1/api/create_user
+* [Update User](#update-user) : http://127.0.0.1/api/update_user
+* [Forgot Password](#forgot-password) : http://127.0.0.1/api/forgot_password
+* [Add Device](#add-device) : http://127.0.0.1/api/add_device
+* [Delete Device](#delete-device) : http://127.0.0.1/api/delete_device
+* [Update Device Settings](#update-device-settings) : http://127.0.0.1/api/update_device_settings
+* [Add Patient](#add-patient) : http://127.0.0.1/api/add_patient
+* [Update Patient Details](#update-patient) : http://127.0.0.1/api/update_patient
+* [Delete Patient](#delete-patient) : http://127.0.0.1/api/add_patient
+* [Post File](#post-data) : http://127.0.0.1/api/post_data
+* [Download File](#get-data) : http://127.0.0.1/api/get_data
 
 ## API Request Format
 
-Login and Logout API is required only when using browser. **For the rest of the APIs, pass Authentications details (Username and Password) with the request if required.**
+### Login User
 
-Authentication used in postman : BasicAuth
+Post Request
+
+Local host link : http://127.0.0.1/api/login
+
+JSON Format:
+
+```
+{
+    "username": "",
+    "password": ""
+}
+```
+
+Will Return session_id. Example,
+
+```
+"abcdefgh1234567890abcdefghijklmnopqrstuv"
+```
+
+### Logout User
+
+Post Request
+
+Local host link : http://127.0.0.1/api/logout
+
+JSON Format:
+
+```
+{
+    "session_id" : ""
+}
+```
 
 ### Create User
 
@@ -82,6 +117,7 @@ User Authentication Required.
 Json Format
 ```
 {
+    "session_id" : ""
     "username": "",
     "first_name": "",
     "last_name": "",
@@ -144,6 +180,7 @@ User Authentication Required.
 Json Format
 ```
 {
+    "session_id" : ""
     "device_name": "",
     "serial_number": "",
     "Mac_id": "",
@@ -163,6 +200,7 @@ User Authentication Required.
 Json Format
 ```
 {
+    "session_id" : ""
     "serial_number": ""
 }
 ```
@@ -179,6 +217,7 @@ User Authentication Required.
 Json Format
 ```
 {
+    "session_id" : ""
     "serial_number" : "",
     "device_name" : "",
     "Firmware_version_id" : "",
@@ -201,7 +240,48 @@ Json Format
 
 ```
 {
+    "session_id" : ""
     "patient_name" : "",
+    "patient_number" : ""
+}
+```
+
+Patient number is unique and identifies the patient.
+
+### Update Patient
+
+POST Request.
+
+Local host link : http://127.0.0.1/api/update_patient
+
+User Authentication Required.
+
+Json Format
+
+```
+{
+    "session_id" : ""
+    "patient_name" : "",
+    "patient_number" : ""
+}
+```
+
+ Patient number identifies the patient. Will replace old patient Name with new patient name.
+
+### Delete Patient
+
+POST Request
+
+Local host link : http://127.0.0.1/api/delete_patient
+
+User Authentication Required.
+
+Json Format
+
+
+```
+{
+    "session_id" : ""
     "patient_number" : ""
 }
 ```
@@ -219,12 +299,14 @@ Form Format
 Content-Type : multipart/form-data
 
 ```
+session_id - ""
 data_id - ""
 device_sl_no - ""
 patient_no - ""
 File - (File to upload)
 Start_Time - "HH:MM:SS.SSSS"
 End_Time - "HH:MM:SS.SSSS"
+overwrite - ""  (default False)
 ```
 
 "data_id" wil uniquely identify a file.
@@ -241,6 +323,7 @@ User Authentication Required.
 
 ```
 {
+    "session_id" : ""
     "data_id" : ""
 }
 ```
