@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import generics
 from rest_framework import permissions
 from .models import Device
-from .serializers import DeviceSerializer, DeleteSerializer, UpdateSerializer, AddDeviceSerializer
+from .serializers import DeviceSerializer, DeleteSerializer, UpdateSerializer, AddDeviceSerializer, get_ota_serializer
 from .permissions import IsSuperUserOrReadOnly
 from misc.models import user_device_mapping
 from firmware.models import Firmware_Version
@@ -10,7 +10,9 @@ from django.contrib.auth.models import User
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
+from django.http import JsonResponse
 
 # Create your views here.
 
@@ -25,6 +27,44 @@ class DetailDevice(generics.RetrieveAPIView):
     serializer_class = DeviceSerializer
     permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser, IsSuperUserOrReadOnly]
 
+class get_ota(APIView):
+    def get(self, request):
+        serializer = get_ota_serializer(data = request.data)
+        if(serializer.is_valid()):
+
+            session_id = serializer.validated_data.get("session_id")
+            token_set = Token.objects.filter(key = session_id)
+
+            if(token_set.exists()):
+
+                token_object = Token.objects.get(key = session_id)
+
+                current_user = token_object.user
+                serial_number = serializer.validated_data.get("serial_number")
+
+                device_set = Device.objects.filter(serial_number = serial_number)
+
+                if(device_set.exists()):
+
+                    device_object = Device.objects.get(serial_number = serial_number)
+                    device_firmware_object = Firmware_Version.objects.get(device_id_fk = device_object)
+
+                    return_data = {
+                        'device_name' : device_object.device_name,
+                        'serial_number' : device_object.serial_number,
+                        'Mac_id' : device_object.Mac_id,
+                        'Num_of_Leads' : device_object.Num_of_Leads,
+                        'Firmware_Version_id' : device_firmware_object.Firmware_Version_id ,
+                        'Firmware_version_number' : device_firmware_object.Firmware_version_number
+                    }
+
+                    return Response(data = return_data, status = status.HTTP_200_OK)
+
+                return Response("DEVICE DOES NOT EXIST", status=status.HTTP_400_BAD_REQUEST)
+
+            return Response("INVALID SESSION", status=status.HTTP_401_UNAUTHORIZED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # Update Device API
 @api_view(['POST'])

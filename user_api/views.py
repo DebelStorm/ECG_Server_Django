@@ -116,7 +116,7 @@ class UserDetailView(APIView):
             return Response(serializer.data)
     '''
 
-    def patch(self, request):
+    def post(self, request, *args, **kwargs):
 
         serializer = UserUpdateSerializer(data = request.data)
 

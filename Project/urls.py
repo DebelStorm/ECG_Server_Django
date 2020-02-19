@@ -5,7 +5,7 @@ from django.conf.urls import include
 from rest_framework import routers
 
 from user_api.views import UserListView, UserCreateView, UserDetailView, ForgotPassword, test_redirect, UserLoginView, UserLogoutView#, CurrentUserView
-from device.views import add_device, update_device_settings, delete_device
+from device.views import add_device, update_device_settings, delete_device, get_ota
 from data.views import post_data_forms, get_data, get_data_via_browser
 from patient.views import CreatePatient, ListPatients, UpdatePatient, DeletePatient#, RetrieveUpdateDeletePatient
 from rest_framework.authtoken.views import obtain_auth_token
@@ -38,6 +38,7 @@ urlpatterns = [
     path('api/list_patient', ListPatients.as_view()),
     path('api/update_patient', UpdatePatient.as_view()),
     path('api/delete_patient', DeletePatient.as_view()),
+    path('api/get_ota', get_ota.as_view()),
     #path('users/',include('user_api.urls')),
     #path('devices/',include('device.urls')),
     #path('patients/',include('patient.urls')),

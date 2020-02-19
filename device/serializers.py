@@ -25,3 +25,7 @@ class UpdateSerializer(serializers.Serializer):
     Firmware_version_number = serializers.CharField(max_length = 100, required = False)
     Mac_id = serializers.CharField(max_length = 100, required = False)
     Num_of_Leads = serializers.IntegerField(required = False)
+
+class get_ota_serializer(serializers.Serializer):
+    session_id = serializers.CharField(max_length = 100, required = True)
+    serial_number = serializers.CharField(max_length = 100, required=True)

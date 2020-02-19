@@ -41,6 +41,7 @@ wheel               0.33.6
 * [Forgot Password](#forgot-password) : http://127.0.0.1/api/forgot_password
 * [Add Device](#add-device) : http://127.0.0.1/api/add_device
 * [Delete Device](#delete-device) : http://127.0.0.1/api/delete_device
+* [Get OTA of Device](#get-ota-device) : http://127.0.0.1/api/get_ota
 * [Update Device Settings](#update-device-settings) : http://127.0.0.1/api/update_device_settings
 * [Add Patient](#add-patient) : http://127.0.0.1/api/add_patient
 * [Update Patient Details](#update-patient) : http://127.0.0.1/api/update_patient
@@ -205,6 +206,35 @@ Json Format
 }
 ```
 Only the users who have map in user_device_map for the device or, a superuser can delete device.
+
+### Get OTA Device
+
+GET Request.
+
+Local host link : http://127.0.0.1/api/get_ota
+
+User Authentication Required.
+
+Json Format
+```
+{
+    "session_id" : ""
+    "serial_number": ""
+}
+```
+
+Return data of device with the give serial number in the following JSON format:
+
+```
+{
+    "device_name": "",
+    "serial_number": "",
+    "Mac_id": "",
+    "Num_of_Leads": 10,
+    "Firmware_Version_id": "",
+    "Firmware_version_number": ""
+}
+```
 
 ### Update Device Settings
 
