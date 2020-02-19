@@ -106,7 +106,7 @@ POST Request.
 
 Local host link : http://127.0.0.1/api/create_user
 
-Currently reserved only for superusers
+No Authentication Required
 
 Json Format
 ```
