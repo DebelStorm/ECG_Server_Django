@@ -5,14 +5,15 @@
 ```
 Package             Version   
 ------------------- ----------
-asgiref             3.2.3     
-base32-lib          1.0.1     
+
+07 Feb :
+
+asgiref             3.2.3        
 certifi             2019.11.28
 chardet             3.0.4     
 defusedxml          0.6.0     
 Django              3.0.2     
-django-allauth      0.41.0    
-django-otp          0.8.1     
+django-allauth      0.41.0       
 django-rest-auth    0.9.5     
 djangorestframework 3.11.0    
 httpie              2.0.0     
@@ -21,7 +22,6 @@ mysqlclient         1.4.6
 oauthlib            3.1.0     
 pip                 20.0.2    
 Pygments            2.5.2     
-pyotp               2.3.0     
 python3-openid      3.1.0     
 pytz                2019.3    
 requests            2.22.0    
@@ -31,7 +31,21 @@ six                 1.14.0
 sqlparse            0.3.0     
 urllib3             1.25.7    
 wheel               0.33.6   
+
+19 Feb:
+
+base32-lib          1.0.1  
+django-otp          0.8.1
+pyotp               2.3.0
+
 ```
+
+The packages can be also installed using the following command
+
+```
+pip install asgiref certifi chardet defusedxml Django django-allauth django-rest-auth djangorestframework httpie idna mysqlclient oauthlib Pygments python3-openid pytz requests requests-oauthlib setuptools six sqlparse urllib3 wheel base32-lib django-otp pip pyotp
+```
+
 ## APIs
 
 * [Login User](#login-user) : http://127.0.0.1/api/login
