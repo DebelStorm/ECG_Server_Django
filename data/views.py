@@ -29,42 +29,46 @@ class post_data_forms(APIView):
                 token_object = Token.objects.get(key = session_id)
                 current_user = token_object.user
 
-                if(Device.objects.filter(serial_number = serializer.validated_data.get('device_sl_no')).exists() and Patient.objects.filter(patient_number = serializer.validated_data.get('patient_no')).exists()):
+                if(Device.objects.filter(serial_number = serializer.validated_data.get('device_sl_no')).exists()):
 
-                    current_device = Device.objects.get(serial_number = serializer.validated_data.get('device_sl_no'))
-                    current_patient = Patient.objects.get(patient_number = serializer.validated_data.get('patient_no'))
+                    if(Patient.objects.filter(patient_number = serializer.validated_data.get('patient_no')).exists()):
 
-                    data_id = serializer.validated_data.get('data_id')
+                        current_device = Device.objects.get(serial_number = serializer.validated_data.get('device_sl_no'))
+                        current_patient = Patient.objects.get(patient_number = serializer.validated_data.get('patient_no'))
 
-                    overwrite = serializer.validated_data.get('overwrite')
+                        data_id = serializer.validated_data.get('data_id')
 
-                    if(not Data.objects.filter(data_file_id = data_id).exists()):
+                        overwrite = serializer.validated_data.get('overwrite')
 
-                        new_file = Data(data_file_id = data_id , device_id_fk = current_device, user_id_fk = current_user, patient_id_fk = current_patient, File = serializer.validated_data.get('File'), Start_Time = serializer.validated_data.get('Start_Time'), End_Time = serializer.validated_data.get('End_Time'))
-                        new_file.save()
-
-                        return Response("SUCCESS", status = status.HTTP_200_OK)
-
-                    elif(overwrite):
-
-                        old_file = Data.objects.get(data_file_id = data_id)
-
-                        old_file_user = old_file.user_id_fk
-
-                        if(old_file_user == current_user):
-
-                            old_file.delete()
+                        if(not Data.objects.filter(data_file_id = data_id).exists()):
 
                             new_file = Data(data_file_id = data_id , device_id_fk = current_device, user_id_fk = current_user, patient_id_fk = current_patient, File = serializer.validated_data.get('File'), Start_Time = serializer.validated_data.get('Start_Time'), End_Time = serializer.validated_data.get('End_Time'))
                             new_file.save()
 
-                            return Response("SUCCESS (file Overwritten)", status = status.HTTP_200_OK)
+                            return Response("SUCCESS", status = status.HTTP_200_OK)
 
-                        return Response("CANNOT OVERWRITE FILE UPLOADED BY ANOTHER USER", status = status.HTTP_400_BAD_REQUEST)
+                        elif(overwrite):
 
-                    return Response("FILE ALREADY EXISTS", status = status.HTTP_400_BAD_REQUEST)
+                            old_file = Data.objects.get(data_file_id = data_id)
 
-                return Response("DEVICE/PATIENT INFO INVALID", status = status.HTTP_400_BAD_REQUEST)
+                            old_file_user = old_file.user_id_fk
+
+                            if(old_file_user == current_user):
+
+                                old_file.delete()
+
+                                new_file = Data(data_file_id = data_id , device_id_fk = current_device, user_id_fk = current_user, patient_id_fk = current_patient, File = serializer.validated_data.get('File'), Start_Time = serializer.validated_data.get('Start_Time'), End_Time = serializer.validated_data.get('End_Time'))
+                                new_file.save()
+
+                                return Response("SUCCESS (file Overwritten)", status = status.HTTP_200_OK)
+
+                            return Response("CANNOT OVERWRITE FILE UPLOADED BY ANOTHER USER", status = status.HTTP_400_BAD_REQUEST)
+
+                        return Response("FILE ALREADY EXISTS", status = status.HTTP_400_BAD_REQUEST)
+
+                    return Response("PATIENT INFO INVALID", status = status.HTTP_400_BAD_REQUEST)
+
+                return Response("DEVICE INFO INVALID", status = status.HTTP_400_BAD_REQUEST)
 
             return Response("UNAUTHORIZED", status=status.HTTP_401_UNAUTHORIZED)
 
