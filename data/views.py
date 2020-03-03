@@ -110,10 +110,14 @@ class get_data(APIView):
 
                     if(current_user == file_to_be_sent.user_id_fk):
 
-                        response = HttpResponse(file_to_be_sent.File, content_type='text/plain')
-                        response['Content-Disposition'] = 'attachment; filename=data.bin'
+                        if(file_to_be_sent.File.storage.exists(file_to_be_sent.File.name)):
 
-                        return response
+                            response = HttpResponse(file_to_be_sent.File, content_type='text/plain')
+                            response['Content-Disposition'] = 'attachment; filename=data.bin'
+
+                            return response
+
+                        return Response("FILE MISSING IN SERVER", status=status.HTTP_404_NOT_FOUND)
 
                     return Response("UNAUTHORIZED", status=status.HTTP_401_UNAUTHORIZED)
 
