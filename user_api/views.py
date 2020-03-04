@@ -16,6 +16,9 @@ from django.http import HttpResponseRedirect
 import pyotp, random, base32_lib
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
+from rest_framework.exceptions import ParseError
+from django.http import HttpResponseNotFound
+import json
 
 # Create your views here.
 
@@ -24,9 +27,19 @@ from django.contrib.auth.decorators import login_required
 def test_redirect(request):
     return HttpResponseRedirect("api/login")
 
+def redirect_404_response(request, exception):
+    response_data = {}
+    response_data['error'] = '404 Not found.'
+    response_data['status'] = 'FAIL'
+    return HttpResponseNotFound(json.dumps(response_data), content_type="application/json")
+
 class UserLoginView(APIView):
     def post(self, request, *args, **kwargs):
-        serializer = LoginSerializer(data = request.data)
+        try:
+            serializer = LoginSerializer(data = request.data)
+        except ParseError:
+            return Response({"error" : "JSON PARSE ERROR", "status" : "FAIL"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         if(serializer.is_valid()):
             username = serializer.validated_data.get("username")
             password = serializer.validated_data.get("password")
@@ -40,26 +53,36 @@ class UserLoginView(APIView):
                     token = new_token
                 else:
                     token = Token.objects.create(user = user)
-                return Response(token.key, status = status.HTTP_200_OK)
+                return Response({"session_id" : token.key, "status" : "SUCCESS"}, status = status.HTTP_200_OK)
             else:
-                return Response("Login Failed. Check username/password.", status.HTTP_400_BAD_REQUEST)
+                return Response({"error" : "Login Failed. Check username/password.", "status" : "FAIL"}, status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+            error_key = list(serializer.errors.keys())[0]
+            error_value = list(serializer.errors.values())[0]
+            error_string = str(error_key) + " : " + str(error_value)
+            return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
 class UserLogoutView(APIView):
     def post(self, request, *args, **kwargs):
-        serializer = LogoutSerializer(data = request.data)
+        try:
+            serializer = LogoutSerializer(data = request.data)
+        except ParseError:
+            return Response({"error" : "JSON PARSE ERROR", "status" : "FAIL"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         if(serializer.is_valid()):
             session_id = serializer.validated_data.get("session_id")
             token_set = Token.objects.filter(key = session_id)
             if(token_set.exists()):
                 token_object = Token.objects.get(key = session_id)
                 token_object.delete()
-                return Response("SUCCESS", status = status.HTTP_200_OK)
+                return Response({"status" : "SUCCESS"}, status = status.HTTP_200_OK)
             else:
-                return Response("Already Logged Out.", status = status.HTTP_200_OK)
+                return Response({"error" : "Already Logged Out.", "status" : "OK"}, status = status.HTTP_200_OK)
         else:
-            return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+            error_key = list(serializer.errors.keys())[0]
+            error_value = list(serializer.errors.values())[0]
+            error_string = str(error_key) + " : " + str(error_value)
+            return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
 
 class UserListView(generics.ListAPIView):
@@ -74,7 +97,11 @@ class UserCreateView(generics.CreateAPIView):
     parser_classes = (JSONParser, MultiPartParser,)
 
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data = request.data)
+        try:
+            serializer = self.get_serializer(data = request.data)
+        except ParseError:
+            return Response({"error" : "JSON PARSE ERROR", "status" : "FAIL"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         if(serializer.is_valid()):
             Password = serializer.validated_data.get('password')
             Confirm_Password = serializer.validated_data.get('Confirm_Password')
@@ -92,33 +119,33 @@ class UserCreateView(generics.CreateAPIView):
                 else:
                     user.profile = None
                 user.save()
-                return Response("SUCCESS", status = status.HTTP_200_OK)
+                return Response({"status" : "SUCCESS"}, status = status.HTTP_200_OK)
             else:
-                return Response("Check Password and Confirm Password", status = status.HTTP_406_NOT_ACCEPTABLE)
-        return Response(serializer.errors, status = status.HTTP_406_NOT_ACCEPTABLE)
+                return Response({"error" : "Check Password and Confirm Password","status" : "FAIL"}, status = status.HTTP_406_NOT_ACCEPTABLE)
 
+        error_key = list(serializer.errors.keys())[0]
+        error_value = list(serializer.errors.values())[0]
+        error_string = str(error_key) + " : " + str(error_value)
+        return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
+
+    '''
     def perform_create(self, serializer):
         try:
             if(serializer.is_valid()):
                 serializer.save()
         except:
             pass
+    '''
 
 class UserDetailView(APIView):
+
     parser_classes = (JSONParser,)
-
-    '''
-    def get(self, request):
-        if(not request.user.is_authenticated):
-            return Response("FAIL", status=status.HTTP_401_UNAUTHORIZED)#status=status.HTTP_401_UNAUTHORIZED)
-        else:
-            serializer = UserShowOnlySerializer(request.user)
-            return Response(serializer.data)
-    '''
-
     def post(self, request, *args, **kwargs):
 
-        serializer = UserUpdateSerializer(data = request.data)
+        try:
+            serializer = UserUpdateSerializer(data = request.data)
+        except ParseError:
+            return Response({"error" : "JSON PARSE ERROR", "status" : "FAIL"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         if(serializer.is_valid()):
 
@@ -150,18 +177,23 @@ class UserDetailView(APIView):
 
                 current_user.save()
                 current_user.profile.save()
-                return Response("SUCCESS", status = status.HTTP_200_OK)
+                return Response({"status": "SUCCESS"}, status = status.HTTP_200_OK)
 
-            return Response("FAIL", status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"error" : "UNAUTHORIZED", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+        error_key = list(serializer.errors.keys())[0]
+        error_value = list(serializer.errors.values())[0]
+        error_string = str(error_key) + " : " + str(error_value)
+        return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
 
 class ForgotPassword(APIView):
     #serializer_class = ForgotPasswordSerializer
     def post(self, request, *args, **kwargs):
-
-        serializer = ForgotPasswordSerializer(data = request.data)
+        try:
+            serializer = ForgotPasswordSerializer(data = request.data)
+        except ParseError:
+            return Response({"error" : "JSON PARSE ERROR", "status" : "FAIL"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         if(serializer.is_valid()):
             email = serializer.validated_data.get('email')
@@ -184,7 +216,7 @@ class ForgotPassword(APIView):
 
                         if((new_pass1 == None) or (new_pass2 == None)):
 
-                            return Response("Please enter both new_password and new_password_confirm.", status = status.HTTP_406_NOT_ACCEPTABLE)
+                            return Response({"error" : "Please enter both new_password and new_password_confirm.", "status" : "FAIL"}, status = status.HTTP_406_NOT_ACCEPTABLE)
 
                         elif(new_pass1 == new_pass2):
 
@@ -196,11 +228,11 @@ class ForgotPassword(APIView):
                             current_user.profile.OTP = key
                             current_user.profile.save()
 
-                            return Response("Password Updated Successfully.", status = status.HTTP_200_OK)
+                            return Response({"status" : "SUCCESS", "msg" : "Password Updated Successfully."}, status = status.HTTP_200_OK)
 
                         else:
 
-                            return Response("Password and Confirm Password not same", status = status.HTTP_200_OK)
+                            return Response({"error" : "Password and Confirm Password not same", "status" : "FAIL"}, status = status.HTTP_200_OK)
 
                     elif(OTP == None):
 
@@ -211,15 +243,18 @@ class ForgotPassword(APIView):
                         try:
                             send_mail("OTP", key, EMAIL_HOST_USER, [user_mail], fail_silently=False,)
                         except BadHeaderError:
-                            return Response("Invalid header found.")
-                        return Response("OTP Sent to registered mail.", status = status.HTTP_200_OK)
+                            return Response({"error": "Unable to send OTP. Invalid header found.", "status" : "FAIL"})
+                        return Response({"status" : "SUCCESS", "msg" : "OTP Sent to registered mail."}, status = status.HTTP_200_OK)
 
                     else:
-                        return Response("INVALID OTP", status = status.HTTP_406_NOT_ACCEPTABLE)
+                        return Response({"error" : "INVALID OTP" , "status" : "FAIL"}, status = status.HTTP_406_NOT_ACCEPTABLE)
                 else:
 
-                    return Response("Check username/email", status = status.HTTP_406_NOT_ACCEPTABLE)
+                    return Response({"error" : "Check username/email" , "status" : "FAIL"}, status = status.HTTP_406_NOT_ACCEPTABLE)
 
-            return Response("FAIL", status = status.HTTP_404_NOT_FOUND)
+            return Response({"error" : "Invalid username/email" , "status" : "FAIL"}, status = status.HTTP_404_NOT_FOUND)
 
-        return Response(serializer.errors, status = status.HTTP_406_NOT_ACCEPTABLE)
+        error_key = list(serializer.errors.keys())[0]
+        error_value = list(serializer.errors.values())[0]
+        error_string = str(error_key) + " : " + str(error_value)
+        return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)

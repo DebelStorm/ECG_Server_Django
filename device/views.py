@@ -13,6 +13,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from django.http import JsonResponse
+from rest_framework.exceptions import ParseError
 
 # Create your views here.
 
@@ -29,7 +30,11 @@ class DetailDevice(generics.RetrieveAPIView):
 
 class show_devices(APIView):
     def get(self, request):
-        serializer = get_session_id_serializer(data = request.data)
+        try:
+            serializer = get_session_id_serializer(data = request.data)
+        except:
+            return Response({"error" : "JSON PARSE ERROR", "status" : "FAIL"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         if(serializer.is_valid()):
 
             session_id = serializer.validated_data.get("session_id")
@@ -62,13 +67,20 @@ class show_devices(APIView):
 
                 return Response(data = json_objects, status = status.HTTP_200_OK)
 
-            return Response("INVALID SESSION", status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"error" : "INVALID SESSION", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        error_key = list(serializer.errors.keys())[0]
+        error_value = list(serializer.errors.values())[0]
+        error_string = str(error_key) + " : " + str(error_value)
+        return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
 class get_ota(APIView):
     def get(self, request):
-        serializer = get_ota_serializer(data = request.data)
+        try:
+            serializer = get_ota_serializer(data = request.data)
+        except:
+            return Response({"error" : "JSON PARSE ERROR", "status" : "FAIL"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         if(serializer.is_valid()):
 
             session_id = serializer.validated_data.get("session_id")
@@ -99,17 +111,24 @@ class get_ota(APIView):
 
                     return Response(data = return_data, status = status.HTTP_200_OK)
 
-                return Response("DEVICE DOES NOT EXIST", status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error" : "DEVICE DOES NOT EXIST", "status" : "FAIL"}, status=status.HTTP_400_BAD_REQUEST)
 
-            return Response("INVALID SESSION", status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"error" : "INVALID SESSION", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        error_key = list(serializer.errors.keys())[0]
+        error_value = list(serializer.errors.values())[0]
+        error_string = str(error_key) + " : " + str(error_value)
+        return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
 # Update Device API
 @api_view(['POST'])
 def update_device_settings(request):
     if(request.method == 'POST'):
-        serializer = UpdateSerializer(data = request.data)
+        try:
+            serializer = UpdateSerializer(data = request.data)
+        except:
+            return Response({"error" : "JSON PARSE ERROR", "status" : "FAIL"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         if(serializer.is_valid()):
             session_id = serializer.validated_data.get("session_id")
             token_set = Token.objects.filter(key = session_id)
@@ -151,21 +170,28 @@ def update_device_settings(request):
                         device_to_be_updated.save()
                         device_firmware_object.save()
 
-                        return Response("SUCCESS",status=status.HTTP_200_OK)
+                        return Response({"status" : "SUCCESS"},status=status.HTTP_200_OK)
 
-                    return Response("UNAUTHORIZED", status=status.HTTP_401_UNAUTHORIZED)
+                    return Response({"error" : "UNAUTHORIZED", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
 
-                return Response("DEVICE DOES NOT EXIST", status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error" : "DEVICE DOES NOT EXIST", "status" : "FAIL"}, status=status.HTTP_400_BAD_REQUEST)
 
-            return Response("INVALID SESSION", status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"error" : "INVALID SESSION", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        error_key = list(serializer.errors.keys())[0]
+        error_value = list(serializer.errors.values())[0]
+        error_string = str(error_key) + " : " + str(error_value)
+        return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
 ## DELETE DEVICE API
 @api_view(['POST'])
 def delete_device(request):
     if(request.method == 'POST'):
-        serializer = DeleteSerializer(data = request.data)
+        try:
+            serializer = DeleteSerializer(data = request.data)
+        except:
+            return Response({"error" : "JSON PARSE ERROR", "status" : "FAIL"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         if(serializer.is_valid()):
             session_id = serializer.validated_data.get("session_id")
             token_set = Token.objects.filter(key = session_id)
@@ -184,21 +210,28 @@ def delete_device(request):
                     if(set2.exists() or current_user.is_staff):
 
                         device_to_be_deleted.delete()
-                        return Response("SUCCESS", status=status.HTTP_200_OK)
+                        return Response({"status" : "SUCCESS"}, status=status.HTTP_200_OK)
 
-                    return Response("UNAUTHORIZED", status=status.HTTP_401_UNAUTHORIZED)
+                    return Response({"error" : "UNAUTHORIZED", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
 
-                return Response("DEVICE DOES NOT EXIST", status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error" : "DEVICE DOES NOT EXIST", "status" : "FAIL"}, status=status.HTTP_400_BAD_REQUEST)
 
-            return Response("INVALID SESSION", status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"error" : "INVALID SESSION", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        error_key = list(serializer.errors.keys())[0]
+        error_value = list(serializer.errors.values())[0]
+        error_string = str(error_key) + " : " + str(error_value)
+        return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
 ##  ADD DEVICE API
 @api_view(['POST'])
 def add_device(request):
     if(request.method == 'POST'):
-        serializer = AddDeviceSerializer(data = request.data)
+        try:
+            serializer = AddDeviceSerializer(data = request.data)
+        except:
+            return Response({"error" : "JSON PARSE ERROR", "status" : "FAIL"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         if(serializer.is_valid()):
 
             session_id = serializer.validated_data.get("session_id")
@@ -233,8 +266,11 @@ def add_device(request):
                     new_u_d_map = user_device_mapping(user_id_fk = current_user, device_id_fk = new_device)
                     new_u_d_map.save()
 
-                return Response("SUCCESS", status=status.HTTP_201_CREATED)
+                return Response({"status" : "SUCCESS"}, status=status.HTTP_201_CREATED)
 
-            return Response("INVALID AUTH", status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"error" : "INVALID AUTH", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
+        error_key = list(serializer.errors.keys())[0]
+        error_value = list(serializer.errors.values())[0]
+        error_string = str(error_key) + " : " + str(error_value)
+        return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)

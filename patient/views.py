@@ -9,10 +9,15 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework import generics, permissions, status
 from misc.models import user_patient_mapping
+from rest_framework.exceptions import ParseError
 
 class CreatePatient(APIView):
     def post(self, request, *args, **kwargs):
-        serializer = PatientSerializer(data = request.data)
+        try:
+            serializer = PatientSerializer(data = request.data)
+        except ParseError:
+            return Response({"error" : "JSON PARSE ERROR", "status" : "FAIL"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         if(serializer.is_valid()):
             session_id = serializer.validated_data.get("session_id")
             token_set = Token.objects.filter(key = session_id)
@@ -35,15 +40,22 @@ class CreatePatient(APIView):
                     user_pat_map = user_patient_mapping(user_id_fk = current_user, patient_id_fk = patient_obj)
                     user_pat_map.save()
 
-                return Response("SUCCESS", status = status.HTTP_200_OK)
+                return Response({"status" : "SUCCESS"}, status = status.HTTP_200_OK)
 
-            return Response("INVALID TOKEN", status = status.HTTP_401_UNAUTHORIZED)
+            return Response({"error" : "INVALID TOKEN", "status" : "FAIL"}, status = status.HTTP_401_UNAUTHORIZED)
 
-        return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+        error_key = list(serializer.errors.keys())[0]
+        error_value = list(serializer.errors.values())[0]
+        error_string = str(error_key) + " : " + str(error_value)
+        return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
 class UpdatePatient(APIView):
     def post(self, request, *args, **kwargs):
-        serializer = PatientUpdateSerializer(data = request.data)
+        try:
+            serializer = PatientUpdateSerializer(data = request.data)
+        except ParseError:
+            return Response({"error" : "JSON PARSE ERROR", "status" : "FAIL"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         if(serializer.is_valid()):
             session_id = serializer.validated_data.get("session_id")
             token_set = Token.objects.filter(key = session_id)
@@ -70,21 +82,28 @@ class UpdatePatient(APIView):
                             patient_obj.patient_name = patient_name
                             patient_obj.save()
 
-                            return Response("SUCCESS", status = status.HTTP_200_OK)
+                            return Response({"status" : "SUCCESS"}, status = status.HTTP_200_OK)
 
-                        return Response("UNAUTHORIZED", status = status.HTTP_401_UNAUTHORIZED)
+                        return Response({"error" : "UNAUTHORIZED", "status" : "FAIL"}, status = status.HTTP_401_UNAUTHORIZED)
 
-                    return Response("PATIENT DOES NOT EXIST", status = status.HTTP_400_BAD_REQUEST)
+                    return Response({"error" : "PATIENT DOES NOT EXIST", "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
-                return Response("PLEASE PROVIDE DETAILS FOR UPDATE", status = status.HTTP_400_BAD_REQUEST)
+                return Response({"error" : "PLEASE PROVIDE DETAILS FOR UPDATE", "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
-            return Response("INVALID TOKEN", status = status.HTTP_401_UNAUTHORIZED)
+            return Response({"error" : "INVALID TOKEN", "status" : "FAIL"}, status = status.HTTP_401_UNAUTHORIZED)
 
-        return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+        error_key = list(serializer.errors.keys())[0]
+        error_value = list(serializer.errors.values())[0]
+        error_string = str(error_key) + " : " + str(error_value)
+        return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
 class DeletePatient(APIView):
     def post(self, request, *args, **kwargs):
-        serializer = PatientDeleteSerializer(data = request.data)
+        try:
+            serializer = PatientDeleteSerializer(data = request.data)
+        except ParseError:
+            return Response({"error" : "JSON PARSE ERROR", "status" : "FAIL"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         if(serializer.is_valid()):
             session_id = serializer.validated_data.get("session_id")
             token_set = Token.objects.filter(key = session_id)
@@ -105,19 +124,26 @@ class DeletePatient(APIView):
                     if(user_pat_set.exists()):
 
                         patient_obj.delete()
-                        return Response("SUCCESS", status = status.HTTP_200_OK)
+                        return Response({"status" : "SUCCESS"}, status = status.HTTP_200_OK)
 
-                    return Response("UNAUTHORIZED", status = status.HTTP_401_UNAUTHORIZED)
+                    return Response({"error" : "UNAUTHORIZED", "status" : "FAIL"}, status = status.HTTP_401_UNAUTHORIZED)
 
-                return Response("PATIENT DOES NOT EXIST", status = status.HTTP_400_BAD_REQUEST)
+                return Response({"error" : "PATIENT DOES NOT EXIST", "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
-            return Response("INVALID TOKEN", status = status.HTTP_401_UNAUTHORIZED)
+            return Response({"error" : "INVALID TOKEN", "status" : "FAIL"}, status = status.HTTP_401_UNAUTHORIZED)
 
-        return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+        error_key = list(serializer.errors.keys())[0]
+        error_value = list(serializer.errors.values())[0]
+        error_string = str(error_key) + " : " + str(error_value)
+        return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
 class ShowPatients(APIView):
     def get(self, request):
-        serializer = get_session_id_serializer(data = request.data)
+        try:
+            serializer = get_session_id_serializer(data = request.data)
+        except ParseError:
+            return Response({"error" : "JSON PARSE ERROR", "status" : "FAIL"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         if(serializer.is_valid()):
 
             session_id = serializer.validated_data.get("session_id")
@@ -145,6 +171,9 @@ class ShowPatients(APIView):
 
                 return Response(data = json_objects, status = status.HTTP_200_OK)
 
-            return Response("INVALID SESSION", status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"error" : "INVALID TOKEN", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        error_key = list(serializer.errors.keys())[0]
+        error_value = list(serializer.errors.values())[0]
+        error_string = str(error_key) + " : " + str(error_value)
+        return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)

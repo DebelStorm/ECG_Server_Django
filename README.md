@@ -61,8 +61,8 @@ pip install asgiref certifi chardet defusedxml Django django-allauth django-rest
 * [Add Patient](#add-patient) : http://127.0.0.1/api/add_patient
 * [Update Patient Details](#update-patient) : http://127.0.0.1/api/update_patient
 * [Delete Patient](#delete-patient) : http://127.0.0.1/api/add_patient
-* [Post File](#post-data) : http://127.0.0.1/api/post_data
 * [Show Patients](#show-patients) : http://127.0.0.1/api/show_patients
+* [Post File](#post-data) : http://127.0.0.1/api/post_data
 * [Download File](#get-data) : http://127.0.0.1/api/get_data
 
 ## API Request Format
@@ -357,25 +357,7 @@ Json Format
 }
 ```
 
- Patient number identifies the patient. Will replace old patient Name with new patient name.
-
-### Delete Patient
-
-POST Request
-
-Local host link : http://127.0.0.1/api/delete_patient
-
-User Authentication Required.
-
-Json Format
-
-
-```
-{
-    "session_id" : ""
-    "patient_number" : ""
-}
-```
+Patient number identifies the patient. Will replace old patient Name with new patient name.
 
 ### Show Patients
 
@@ -405,6 +387,25 @@ Returns a list of JSON objects of patients registered by the current user. Eg:
     }
 ]
 ```
+
+### Delete Patient
+
+POST Request
+
+Local host link : http://127.0.0.1/api/delete_patient
+
+User Authentication Required.
+
+Json Format
+
+
+```
+{
+    "session_id" : ""
+    "patient_number" : ""
+}
+```
+
 
 ### Post Data
 
