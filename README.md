@@ -55,6 +55,7 @@ pip install asgiref certifi chardet defusedxml Django django-allauth django-rest
 * [Forgot Password](#forgot-password) : http://127.0.0.1/api/forgot_password
 * [Add Device](#add-device) : http://127.0.0.1/api/add_device
 * [Delete Device](#delete-device) : http://127.0.0.1/api/delete_device
+* [Show Devices](#show-devices) : http://127.0.0.1/api/show_devices
 * [Get OTA of Device](#get-ota-device) : http://127.0.0.1/api/get_ota
 * [Update Device Settings](#update-device-settings) : http://127.0.0.1/api/update_device_settings
 * [Add Patient](#add-patient) : http://127.0.0.1/api/add_patient
@@ -220,6 +221,51 @@ Json Format
 }
 ```
 Only the users who have map in user_device_map for the device or, a superuser can delete device.
+
+### Show Devices
+
+GET Request.
+
+Local host link : http://127.0.0.1/api/show_devices
+
+User Authentication Required.
+
+Json Format
+```
+{
+    "session_id" : ""
+}
+```
+
+Returns a list of JSON objects of devices registered by the current user. Eg:
+```
+[
+    {
+        "device_name": "DeviceOfBetty",
+        "serial_number": "Betty",
+        "Mac_id": "Betty",
+        "Num_of_Leads": 10,
+        "Firmware_Version_id": "123",
+        "Firmware_version_number": "123"
+    },
+    {
+        "device_name": "DeviceOfBetty1",
+        "serial_number": "Betty2",
+        "Mac_id": "Betty",
+        "Num_of_Leads": 10,
+        "Firmware_Version_id": "1234",
+        "Firmware_version_number": "1234"
+    },
+    {
+        "device_name": "DeviceOfBetty1",
+        "serial_number": "Betty3",
+        "Mac_id": "Betty",
+        "Num_of_Leads": 10,
+        "Firmware_Version_id": "1235",
+        "Firmware_version_number": "1235"
+    }
+]
+```
 
 ### Get OTA Device
 

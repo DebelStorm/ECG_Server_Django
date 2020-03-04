@@ -29,3 +29,6 @@ class UpdateSerializer(serializers.Serializer):
 class get_ota_serializer(serializers.Serializer):
     session_id = serializers.CharField(max_length = 100, required = True)
     serial_number = serializers.CharField(max_length = 100, required=True)
+
+class get_session_id_serializer(serializers.Serializer):
+    session_id = serializers.CharField(max_length = 100, required = True)

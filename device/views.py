@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import generics
 from rest_framework import permissions
 from .models import Device
-from .serializers import DeviceSerializer, DeleteSerializer, UpdateSerializer, AddDeviceSerializer, get_ota_serializer
+from .serializers import DeviceSerializer, DeleteSerializer, UpdateSerializer, AddDeviceSerializer, get_ota_serializer, get_session_id_serializer
 from .permissions import IsSuperUserOrReadOnly
 from misc.models import user_device_mapping
 from firmware.models import Firmware_Version
@@ -26,6 +26,45 @@ class DetailDevice(generics.RetrieveAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
     permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser, IsSuperUserOrReadOnly]
+
+class show_devices(APIView):
+    def get(self, request):
+        serializer = get_session_id_serializer(data = request.data)
+        if(serializer.is_valid()):
+
+            session_id = serializer.validated_data.get("session_id")
+            token_set = Token.objects.filter(key = session_id)
+
+            if(token_set.exists()):
+
+                token_object = Token.objects.get(key = session_id)
+                current_user = token_object.user
+
+                user_device_set = user_device_mapping.objects.filter(user_id_fk = current_user)
+
+                json_objects = []
+
+                for usr_device_object in user_device_set.iterator():
+
+                    device_object = usr_device_object.device_id_fk
+                    device_firmware_object = Firmware_Version.objects.get(device_id_fk = device_object)
+
+                    return_data = {
+                        'device_name' : device_object.device_name,
+                        'serial_number' : device_object.serial_number,
+                        'Mac_id' : device_object.Mac_id,
+                        'Num_of_Leads' : device_object.Num_of_Leads,
+                        'Firmware_Version_id' : device_firmware_object.Firmware_Version_id ,
+                        'Firmware_version_number' : device_firmware_object.Firmware_version_number
+                    }
+
+                    json_objects += [return_data]
+
+                return Response(data = json_objects, status = status.HTTP_200_OK)
+
+            return Response("INVALID SESSION", status=status.HTTP_401_UNAUTHORIZED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class get_ota(APIView):
     def get(self, request):
