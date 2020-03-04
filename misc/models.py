@@ -21,4 +21,4 @@ class user_patient_mapping(models.Model):
     user_id_fk = models.ForeignKey(User, on_delete = models.CASCADE) # or PROTECT
 
     def __str__(self):
-        return '%s - %s' % (self.device_id_fk, self.user_id_fk)
+        return '%s - %s' % (self.patient_id_fk, self.user_id_fk)

@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework import generics
-from .serializers import PatientSerializer, PatientListSerializer, PatientUpdateSerializer, PatientDeleteSerializer
+from .serializers import PatientSerializer, PatientListSerializer, PatientUpdateSerializer, PatientDeleteSerializer, get_session_id_serializer
 from .models import Patient
 from .permissions import AuthenticatedOnly
 from rest_framework import permissions
@@ -28,7 +28,7 @@ class CreatePatient(APIView):
                 patient_obj = Patient(patient_name = patient_name, patient_number = patient_number)
                 patient_obj.save()
 
-                user_pat_set = user_patient_mapping.objects.filter(user_id_fk = current_user, patient_id_fk = current_user)
+                user_pat_set = user_patient_mapping.objects.filter(user_id_fk = current_user, patient_id_fk = patient_obj)
 
                 if(not user_pat_set.exists()):
 
@@ -62,7 +62,7 @@ class UpdatePatient(APIView):
 
                     if(patient_set.exists()):
 
-                        user_pat_set = user_patient_mapping.objects.filter(user_id_fk = current_user, patient_id_fk = current_user)
+                        user_pat_set = user_patient_mapping.objects.filter(user_id_fk = current_user, patient_id_fk = patient_obj)
 
                         if(user_pat_set.exists()):
 
@@ -100,7 +100,7 @@ class DeletePatient(APIView):
                 if(patient_set.exists()):
 
                     patient_obj = Patient.objects.get(patient_number = patient_number)
-                    user_pat_set = user_patient_mapping.objects.filter(user_id_fk = current_user, patient_id_fk = current_user)
+                    user_pat_set = user_patient_mapping.objects.filter(user_id_fk = current_user, patient_id_fk = patient_obj)
 
                     if(user_pat_set.exists()):
 
@@ -117,4 +117,34 @@ class DeletePatient(APIView):
 
 class ShowPatients(APIView):
     def get(self, request):
-        pass
+        serializer = get_session_id_serializer(data = request.data)
+        if(serializer.is_valid()):
+
+            session_id = serializer.validated_data.get("session_id")
+            token_set = Token.objects.filter(key = session_id)
+
+            if(token_set.exists()):
+
+                token_object = Token.objects.get(key = session_id)
+                current_user = token_object.user
+
+                user_patient_list = user_patient_mapping.objects.filter(user_id_fk = current_user)
+
+                json_objects = []
+
+                for user_pat_map in user_patient_list.iterator():
+
+                    patient_obj = user_pat_map.patient_id_fk
+
+                    return_data = {
+                        'patient_number' : patient_obj.patient_number,
+                        'patient_name' : patient_obj.patient_name
+                    }
+
+                    json_objects += [return_data]
+
+                return Response(data = json_objects, status = status.HTTP_200_OK)
+
+            return Response("INVALID SESSION", status=status.HTTP_401_UNAUTHORIZED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

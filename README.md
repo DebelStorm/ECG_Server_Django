@@ -62,6 +62,7 @@ pip install asgiref certifi chardet defusedxml Django django-allauth django-rest
 * [Update Patient Details](#update-patient) : http://127.0.0.1/api/update_patient
 * [Delete Patient](#delete-patient) : http://127.0.0.1/api/add_patient
 * [Post File](#post-data) : http://127.0.0.1/api/post_data
+* [Show Patients](#show-patients) : http://127.0.0.1/api/show_patients
 * [Download File](#get-data) : http://127.0.0.1/api/get_data
 
 ## API Request Format
@@ -203,7 +204,7 @@ Json Format
     "Num_of_Leads": ""
 }
 ```
-Creates a new device object and a map to user_device_map table. If device is already present, only the map will be created.
+Creates a new device object and a map to user_device_map table. If device is already present, only the map will be created. "serial_number" uniquely identifies a device.
 
 ### Delete Device
 
@@ -374,6 +375,35 @@ Json Format
     "session_id" : ""
     "patient_number" : ""
 }
+```
+
+### Show Patients
+
+GET Request.
+
+Local host link : http://127.0.0.1/api/show_patients
+
+User Authentication Required.
+
+Json Format
+```
+{
+    "session_id" : ""
+}
+```
+
+Returns a list of JSON objects of patients registered by the current user. Eg:
+```
+[
+    {
+        "patient_number": "1",
+        "patient_name": "Adam"
+    },
+    {
+        "patient_number": "2",
+        "patient_name": "Bobby"
+    }
+]
 ```
 
 ### Post Data
