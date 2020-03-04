@@ -7,6 +7,7 @@ class PatientSerializer(serializers.ModelSerializer):
         model = Patient
         fields = ['session_id', 'patient_name', 'patient_number']
         extra_kwargs =  {
+                            'session_id' : {'required' : True},
                             'patient_name' : {'required' : True},
                             'patient_number' : {'required' : True}
                         }
@@ -24,3 +25,6 @@ class PatientListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
         fields = ['patient_name', 'patient_number']
+
+class get_session_id_serializer(serializers.Serializer):
+    session_id = serializers.CharField(max_length = 100, required = True)

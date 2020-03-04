@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework import generics, permissions, status
+from misc.models import user_patient_mapping
 
 class CreatePatient(APIView):
     def post(self, request, *args, **kwargs):
@@ -26,6 +27,13 @@ class CreatePatient(APIView):
 
                 patient_obj = Patient(patient_name = patient_name, patient_number = patient_number)
                 patient_obj.save()
+
+                user_pat_set = user_patient_mapping.objects.filter(user_id_fk = current_user, patient_id_fk = current_user)
+
+                if(not user_pat_set.exists()):
+
+                    user_pat_map = user_patient_mapping(user_id_fk = current_user, patient_id_fk = patient_obj)
+                    user_pat_map.save()
 
                 return Response("SUCCESS", status = status.HTTP_200_OK)
 
@@ -54,11 +62,17 @@ class UpdatePatient(APIView):
 
                     if(patient_set.exists()):
 
-                        patient_obj = Patient.objects.get(patient_number = patient_number)
-                        patient_obj.patient_name = patient_name
-                        patient_obj.save()
+                        user_pat_set = user_patient_mapping.objects.filter(user_id_fk = current_user, patient_id_fk = current_user)
 
-                        return Response("SUCCESS", status = status.HTTP_200_OK)
+                        if(user_pat_set.exists()):
+
+                            patient_obj = Patient.objects.get(patient_number = patient_number)
+                            patient_obj.patient_name = patient_name
+                            patient_obj.save()
+
+                            return Response("SUCCESS", status = status.HTTP_200_OK)
+
+                        return Response("UNAUTHORIZED", status = status.HTTP_401_UNAUTHORIZED)
 
                     return Response("PATIENT DOES NOT EXIST", status = status.HTTP_400_BAD_REQUEST)
 
@@ -67,7 +81,6 @@ class UpdatePatient(APIView):
             return Response("INVALID TOKEN", status = status.HTTP_401_UNAUTHORIZED)
 
         return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
-
 
 class DeletePatient(APIView):
     def post(self, request, *args, **kwargs):
@@ -82,15 +95,19 @@ class DeletePatient(APIView):
                 current_user = token_object.user
 
                 patient_number = serializer.validated_data.get("patient_number")
-
                 patient_set = Patient.objects.filter(patient_number = patient_number)
 
                 if(patient_set.exists()):
 
                     patient_obj = Patient.objects.get(patient_number = patient_number)
-                    patient_obj.delete()
+                    user_pat_set = user_patient_mapping.objects.filter(user_id_fk = current_user, patient_id_fk = current_user)
 
-                    return Response("SUCCESS", status = status.HTTP_200_OK)
+                    if(user_pat_set.exists()):
+
+                        patient_obj.delete()
+                        return Response("SUCCESS", status = status.HTTP_200_OK)
+
+                    return Response("UNAUTHORIZED", status = status.HTTP_401_UNAUTHORIZED)
 
                 return Response("PATIENT DOES NOT EXIST", status = status.HTTP_400_BAD_REQUEST)
 
@@ -98,24 +115,6 @@ class DeletePatient(APIView):
 
         return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
 
-
-class ListPatients(generics.ListAPIView):
-    queryset = Patient.objects.all()
-    serializer_class = PatientListSerializer
-    #permission_classes = [permissions.IsAuthenticated]
-
-
-# PATIENT DELETE, UPDATE IN PROGRESS
-'''
-class RetrieveUpdateDeletePatient(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Patient.objects.all()
-    serializer_class = PatientNoIDSerializer
-    #permission_classes = [permissions.IsAdminUser]
-
-# Moved Delete Function to RetrieveUpdateDeletePatient
-
-class DeletePatient(generics.DestroyAPIView):
-    queryset = Patient.objects.all()
-    serializer_class = PatientSerializer
-    permissions = [permissions.IsAuthenticated]
-'''
+class ShowPatients(APIView):
+    def get(self, request):
+        pass

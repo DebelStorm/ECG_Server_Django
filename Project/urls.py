@@ -7,7 +7,7 @@ from rest_framework import routers
 from user_api.views import UserListView, UserCreateView, UserDetailView, ForgotPassword, test_redirect, UserLoginView, UserLogoutView#, CurrentUserView
 from device.views import add_device, update_device_settings, delete_device, get_ota, show_devices
 from data.views import post_data_forms, get_data, get_data_via_browser
-from patient.views import CreatePatient, ListPatients, UpdatePatient, DeletePatient#, RetrieveUpdateDeletePatient
+from patient.views import CreatePatient, UpdatePatient, DeletePatient#, RetrieveUpdateDeletePatient
 from rest_framework.authtoken.views import obtain_auth_token
 # router = routers.DefaultRouter()
 
@@ -36,7 +36,6 @@ urlpatterns = [
     path('api/post_data', post_data_forms.as_view()),
 
     path('api/add_patient', CreatePatient.as_view()),
-    path('api/list_patient', ListPatients.as_view()),
     path('api/update_patient', UpdatePatient.as_view()),
     path('api/delete_patient', DeletePatient.as_view()),
     path('api/get_ota', get_ota.as_view()),
