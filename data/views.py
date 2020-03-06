@@ -23,7 +23,7 @@ class post_data_forms(APIView):
             serializer = DataUploadSerializer(data = request.data)
         except ParseError:
             return Response({"error" : "JSON PARSE ERROR", "status" : "FAIL"}, status=status.HTTP_406_NOT_ACCEPTABLE)
-            
+
         if(serializer.is_valid()):
             session_id = serializer.validated_data.get("session_id")
             token_set = Token.objects.filter(key = session_id)
@@ -137,6 +137,6 @@ class get_data(APIView):
             return Response({"error" : "INVALID TOKEN", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
 
         error_key = list(serializer.errors.keys())[0]
-        error_value = list(serializer.errors.values())[0]
+        error_value = list(serializer.errors.values())[0][0]
         error_string = str(error_key) + " : " + str(error_value)
         return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)

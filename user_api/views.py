@@ -58,7 +58,7 @@ class UserLoginView(APIView):
                 return Response({"error" : "Login Failed. Check username/password.", "status" : "FAIL"}, status.HTTP_400_BAD_REQUEST)
         else:
             error_key = list(serializer.errors.keys())[0]
-            error_value = list(serializer.errors.values())[0]
+            error_value = list(serializer.errors.values())[0][0]
             error_string = str(error_key) + " : " + str(error_value)
             return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
@@ -80,7 +80,7 @@ class UserLogoutView(APIView):
                 return Response({"error" : "Already Logged Out.", "status" : "OK"}, status = status.HTTP_200_OK)
         else:
             error_key = list(serializer.errors.keys())[0]
-            error_value = list(serializer.errors.values())[0]
+            error_value = list(serializer.errors.values())[0][0]
             error_string = str(error_key) + " : " + str(error_value)
             return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
@@ -124,7 +124,7 @@ class UserCreateView(generics.CreateAPIView):
                 return Response({"error" : "Check Password and Confirm Password","status" : "FAIL"}, status = status.HTTP_406_NOT_ACCEPTABLE)
 
         error_key = list(serializer.errors.keys())[0]
-        error_value = list(serializer.errors.values())[0]
+        error_value = list(serializer.errors.values())[0][0]
         error_string = str(error_key) + " : " + str(error_value)
         return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
@@ -182,7 +182,7 @@ class UserDetailView(APIView):
             return Response({"error" : "UNAUTHORIZED", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
 
         error_key = list(serializer.errors.keys())[0]
-        error_value = list(serializer.errors.values())[0]
+        error_value = list(serializer.errors.values())[0][0]
         error_string = str(error_key) + " : " + str(error_value)
         return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
@@ -255,6 +255,6 @@ class ForgotPassword(APIView):
             return Response({"error" : "Invalid username/email" , "status" : "FAIL"}, status = status.HTTP_404_NOT_FOUND)
 
         error_key = list(serializer.errors.keys())[0]
-        error_value = list(serializer.errors.values())[0]
+        error_value = list(serializer.errors.values())[0][0]
         error_string = str(error_key) + " : " + str(error_value)
         return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)

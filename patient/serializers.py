@@ -1,16 +1,11 @@
 from rest_framework import serializers
 from .models import Patient
 
-class PatientSerializer(serializers.ModelSerializer):
+class PatientSerializer(serializers.Serializer):
     session_id = serializers.CharField(max_length = 100, required = True)
-    class Meta:
-        model = Patient
-        fields = ['session_id', 'patient_name', 'patient_number']
-        extra_kwargs =  {
-                            'session_id' : {'required' : True},
-                            'patient_name' : {'required' : True},
-                            'patient_number' : {'required' : True}
-                        }
+    serial_number = serializers.CharField(max_length = 100, required = True)
+    patient_name = serializers.CharField(max_length = 100, required = True)
+    patient_number = serializers.CharField(max_length = 100, required = True)
 
 class PatientUpdateSerializer(serializers.Serializer):
     session_id = serializers.CharField(max_length = 100, required = True)
@@ -28,3 +23,7 @@ class PatientListSerializer(serializers.ModelSerializer):
 
 class get_session_id_serializer(serializers.Serializer):
     session_id = serializers.CharField(max_length = 100, required = True)
+
+class get_session_id_slno_serializer(serializers.Serializer):
+    session_id = serializers.CharField(max_length = 100, required = True)
+    serial_number = serializers.CharField(max_length = 100, required = True)

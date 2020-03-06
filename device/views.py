@@ -70,7 +70,7 @@ class show_devices(APIView):
             return Response({"error" : "INVALID SESSION", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
 
         error_key = list(serializer.errors.keys())[0]
-        error_value = list(serializer.errors.values())[0]
+        error_value = list(serializer.errors.values())[0][0]
         error_string = str(error_key) + " : " + str(error_value)
         return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
@@ -116,7 +116,7 @@ class get_ota(APIView):
             return Response({"error" : "INVALID SESSION", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
 
         error_key = list(serializer.errors.keys())[0]
-        error_value = list(serializer.errors.values())[0]
+        error_value = list(serializer.errors.values())[0][0]
         error_string = str(error_key) + " : " + str(error_value)
         return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
@@ -179,7 +179,7 @@ def update_device_settings(request):
             return Response({"error" : "INVALID SESSION", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
 
         error_key = list(serializer.errors.keys())[0]
-        error_value = list(serializer.errors.values())[0]
+        error_value = list(serializer.errors.values())[0][0]
         error_string = str(error_key) + " : " + str(error_value)
         return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
@@ -219,7 +219,7 @@ def delete_device(request):
             return Response({"error" : "INVALID SESSION", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
 
         error_key = list(serializer.errors.keys())[0]
-        error_value = list(serializer.errors.values())[0]
+        error_value = list(serializer.errors.values())[0][0]
         error_string = str(error_key) + " : " + str(error_value)
         return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
@@ -271,6 +271,6 @@ def add_device(request):
             return Response({"error" : "INVALID AUTH", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
 
         error_key = list(serializer.errors.keys())[0]
-        error_value = list(serializer.errors.values())[0]
+        error_value = list(serializer.errors.values())[0][0]
         error_string = str(error_key) + " : " + str(error_value)
         return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)

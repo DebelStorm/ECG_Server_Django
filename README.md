@@ -339,11 +339,14 @@ Json Format
 
 ```
 {
-    "session_id" : ""
+    "session_id" : "",
+    "serial_number" : "",
     "patient_name" : "",
     "patient_number" : ""
 }
 ```
+
+A new patient is mapped against the current user and a device with the given serial number. The device must be registered to the current user.
 
 Patient number is unique and identifies the patient.
 
@@ -378,11 +381,12 @@ User Authentication Required.
 Json Format
 ```
 {
-    "session_id" : ""
+    "session_id" : "",
+    "serial_number" : ""
 }
 ```
 
-Returns a list of JSON objects of patients registered by the current user. Eg:
+Returns a list of JSON objects of patients registered by the current user for an existing device. Eg:
 ```
 {
     "status": "SUCCESS",
