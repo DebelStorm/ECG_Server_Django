@@ -225,7 +225,7 @@ Only the users who have map in user_device_map for the device or, a superuser ca
 
 ### Show Devices
 
-GET Request.
+POST Request.
 
 Local host link : http://127.0.0.1/api/show_devices
 
@@ -240,37 +240,40 @@ Json Format
 
 Returns a list of JSON objects of devices registered by the current user. Eg:
 ```
-[
-    {
-        "device_name": "DeviceOfBetty",
-        "serial_number": "Betty",
-        "Mac_id": "Betty",
-        "Num_of_Leads": 10,
-        "Firmware_Version_id": "123",
-        "Firmware_version_number": "123"
-    },
-    {
-        "device_name": "DeviceOfBetty1",
-        "serial_number": "Betty2",
-        "Mac_id": "Betty",
-        "Num_of_Leads": 10,
-        "Firmware_Version_id": "1234",
-        "Firmware_version_number": "1234"
-    },
-    {
-        "device_name": "DeviceOfBetty1",
-        "serial_number": "Betty3",
-        "Mac_id": "Betty",
-        "Num_of_Leads": 10,
-        "Firmware_Version_id": "1235",
-        "Firmware_version_number": "1235"
-    }
-]
+{
+    "status": "SUCCESS",
+    "data": [
+        {
+            "device_name": "DeviceOfBetty",
+            "serial_number": "Betty",
+            "Mac_id": "Betty",
+            "Num_of_Leads": 10,
+            "Firmware_Version_id": " N/A ",
+            "Firmware_version_number": " N/A "
+        },
+        {
+            "device_name": "DeviceOfBetty1",
+            "serial_number": "Betty2",
+            "Mac_id": "Betty",
+            "Num_of_Leads": 10,
+            "Firmware_Version_id": " N/A ",
+            "Firmware_version_number": " N/A "
+        },
+        {
+            "device_name": "DeviceOfBetty1",
+            "serial_number": "Betty3",
+            "Mac_id": "Betty",
+            "Num_of_Leads": 10,
+            "Firmware_Version_id": " N/A ",
+            "Firmware_version_number": " N/A "
+        }
+    ]
+}
 ```
 
 ### Get OTA Device
 
-GET Request.
+POST Request.
 
 Local host link : http://127.0.0.1/api/get_ota
 
@@ -288,12 +291,17 @@ Return data of device with the give serial number in the following JSON format:
 
 ```
 {
-    "device_name": "",
-    "serial_number": "",
-    "Mac_id": "",
-    "Num_of_Leads": 10,
-    "Firmware_Version_id": "",
-    "Firmware_version_number": ""
+    "status": "SUCCESS",
+    "data": [
+        {
+            "device_name": "DeviceOfBetty",
+            "serial_number": "Betty",
+            "Mac_id": "Betty",
+            "Num_of_Leads": 10,
+            "Firmware_Version_id": " N/A ",
+            "Firmware_version_number": " N/A "
+        }
+    ]
 }
 ```
 
@@ -361,7 +369,7 @@ Patient number identifies the patient. Will replace old patient Name with new pa
 
 ### Show Patients
 
-GET Request.
+POST Request.
 
 Local host link : http://127.0.0.1/api/show_patients
 
@@ -376,16 +384,19 @@ Json Format
 
 Returns a list of JSON objects of patients registered by the current user. Eg:
 ```
-[
-    {
-        "patient_number": "1",
-        "patient_name": "Adam"
-    },
-    {
-        "patient_number": "2",
-        "patient_name": "Bobby"
-    }
-]
+{
+    "status": "SUCCESS",
+    "data": [
+        {
+            "patient_number": "1",
+            "patient_name": "Adam"
+        },
+        {
+            "patient_number": "2",
+            "patient_name": "Bobby"
+        }
+    ]
+}
 ```
 
 ### Delete Patient

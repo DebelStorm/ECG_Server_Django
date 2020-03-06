@@ -29,7 +29,7 @@ class DetailDevice(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser, IsSuperUserOrReadOnly]
 
 class show_devices(APIView):
-    def get(self, request):
+    def post(self, request):
         try:
             serializer = get_session_id_serializer(data = request.data)
         except:
@@ -65,7 +65,7 @@ class show_devices(APIView):
 
                     json_objects += [return_data]
 
-                return Response(data = json_objects, status = status.HTTP_200_OK)
+                return Response({"status" : "SUCCESS" ,"data" : json_objects}, status = status.HTTP_200_OK)
 
             return Response({"error" : "INVALID SESSION", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -75,7 +75,7 @@ class show_devices(APIView):
         return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
 class get_ota(APIView):
-    def get(self, request):
+    def post(self, request):
         try:
             serializer = get_ota_serializer(data = request.data)
         except:
@@ -109,7 +109,7 @@ class get_ota(APIView):
                         'Firmware_version_number' : device_firmware_object.Firmware_version_number
                     }
 
-                    return Response(data = return_data, status = status.HTTP_200_OK)
+                    return Response({"status" : "SUCCESS" ,"data" : [return_data]}, status = status.HTTP_200_OK)
 
                 return Response({"error" : "DEVICE DOES NOT EXIST", "status" : "FAIL"}, status=status.HTTP_400_BAD_REQUEST)
 

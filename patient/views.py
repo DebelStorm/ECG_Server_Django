@@ -138,7 +138,7 @@ class DeletePatient(APIView):
         return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
 class ShowPatients(APIView):
-    def get(self, request):
+    def post(self, request):
         try:
             serializer = get_session_id_serializer(data = request.data)
         except ParseError:
@@ -169,7 +169,7 @@ class ShowPatients(APIView):
 
                     json_objects += [return_data]
 
-                return Response(data = json_objects, status = status.HTTP_200_OK)
+                return Response({"status" : "SUCCESS", "data" : json_objects}, status = status.HTTP_200_OK)
 
             return Response({"error" : "INVALID TOKEN", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
 
