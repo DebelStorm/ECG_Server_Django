@@ -13,8 +13,8 @@ class Data(models.Model):
     user_id_fk = models.ForeignKey(User, on_delete = models.CASCADE) # or PROTECT
     patient_id_fk = models.ForeignKey(Patient, on_delete = models.CASCADE) # or PROTECT
     File = models.FileField(upload_to = 'DJANGO_SERVER_FILES/')
-    Start_Time = models.TimeField(auto_now=False, auto_now_add=False, default = timezone.now)
-    End_Time = models.TimeField(auto_now=False, auto_now_add=False, default = timezone.now)
+    Start_Time = models.BigIntegerField()
+    End_Time = models.BigIntegerField()
 
     def __str__(self):
         return 'File_ID: %s, Patient: %s , User: %s , Device: %s' % (self.data_file_id, self.patient_id_fk, self.user_id_fk, self.patient_id_fk)

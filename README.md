@@ -440,8 +440,8 @@ data_id - ""
 device_sl_no - ""
 patient_no - ""
 File - (File to upload)
-Start_Time - "HH:MM:SS.SSSS"
-End_Time - "HH:MM:SS.SSSS"
+Start_Time - "" (epoch time)
+End_Time - "" (epoch time)
 overwrite - ""  (default False)
 ```
 
