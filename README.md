@@ -472,11 +472,25 @@ User Authentication Required.
 
 ```
 {
-    "session_id" : ""
-    "data_id" : ""
+	"session_id" : "",
+	"serial_number" : "",
+	"patient_no" : "",
+	"Start_Time" : "",
+	"End_Time" : ""
 }
 ```
 
-"data_id" wil uniquely identify a file.
+Response will contain filtered data from all files between "Start_Time" and "End_Time" for the patient from the given device.
 
-Downloads the file with id "data_id".
+Format of response :
+```
+{
+	"status" : "",
+	"no_of_files" : "",
+	"Start_Time_set" : [],
+	"End_Time_set" : [],
+	"No_of_records" : [],
+	"Data" : [ [] , [] , ... , [] ]
+}
+
+```
