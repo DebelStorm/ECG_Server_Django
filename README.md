@@ -38,12 +38,25 @@ base32-lib          1.0.1
 django-otp          0.8.1
 pyotp               2.3.0
 
+10 March :
+
+django-cleanup      4.0.0  
+numpy               1.18.1
+scipy               1.4.1
 ```
 
 The packages can be also installed using the following command
 
 ```
-pip install asgiref certifi chardet defusedxml Django django-allauth django-rest-auth djangorestframework httpie idna mysqlclient oauthlib Pygments python3-openid pytz requests requests-oauthlib setuptools six sqlparse urllib3 wheel base32-lib django-otp pip pyotp
+pip install asgiref certifi chardet defusedxml Django django-allauth django-rest-auth djangorestframework httpie idna mysqlclient oauthlib Pygments python3-openid pytz requests requests-oauthlib setuptools six sqlparse urllib3 wheel base32-lib django-otp pip pyotp django-cleanup scipy numpy
+```
+
+
+Please update the db each time by running the following commands in the project directory.
+
+```
+python manage.py makemigrations
+python manage.py migrate
 ```
 
 ## APIs

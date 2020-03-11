@@ -13,6 +13,7 @@ from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from django.http import HttpResponse
 from rest_framework.authtoken.models import Token
+import csv
 
 # Create your views here.
 
@@ -25,6 +26,7 @@ class post_data_forms(APIView):
             return Response({"error" : "JSON PARSE ERROR", "status" : "FAIL"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         if(serializer.is_valid()):
+
             session_id = serializer.validated_data.get("session_id")
             token_set = Token.objects.filter(key = session_id)
 
@@ -41,12 +43,18 @@ class post_data_forms(APIView):
                         current_patient = Patient.objects.get(patient_number = serializer.validated_data.get('patient_no'))
 
                         data_id = serializer.validated_data.get('data_id')
+                        Start_Time = serializer.validated_data.get('Start_Time')
+                        End_Time = serializer.validated_data.get('End_Time')
+                        File = serializer.validated_data.get('File')
+
+                        if(Start_Time >= End_Time):
+                            return Response({"error" : "Start_Time must be less than End_Time.", "status" : "FAIL"}, status=status.HTTP_400_BAD_REQUEST)
 
                         overwrite = serializer.validated_data.get('overwrite')
 
                         if(not Data.objects.filter(data_file_id = data_id).exists()):
 
-                            new_file = Data(data_file_id = data_id , device_id_fk = current_device, user_id_fk = current_user, patient_id_fk = current_patient, File = serializer.validated_data.get('File'), Start_Time = serializer.validated_data.get('Start_Time'), End_Time = serializer.validated_data.get('End_Time'))
+                            new_file = Data(data_file_id = data_id , device_id_fk = current_device, user_id_fk = current_user, patient_id_fk = current_patient, File = File, Start_Time = Start_Time, End_Time = End_Time)
                             new_file.save()
 
                             return Response({"status" : "SUCCESS"}, status = status.HTTP_200_OK)
@@ -61,7 +69,7 @@ class post_data_forms(APIView):
 
                                 old_file.delete()
 
-                                new_file = Data(data_file_id = data_id , device_id_fk = current_device, user_id_fk = current_user, patient_id_fk = current_patient, File = serializer.validated_data.get('File'), Start_Time = serializer.validated_data.get('Start_Time'), End_Time = serializer.validated_data.get('End_Time'))
+                                new_file = Data(data_file_id = data_id , device_id_fk = current_device, user_id_fk = current_user, patient_id_fk = current_patient, File = File, Start_Time = Start_Time, End_Time = End_Time)
                                 new_file.save()
 
                                 return Response({"status" : "SUCCESS"}, status = status.HTTP_200_OK)
@@ -81,7 +89,6 @@ class post_data_forms(APIView):
         error_string = str(error_key) + " : " + str(error_value)
         return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
-
 class get_data_via_browser(APIView):
     def get(self, request, data_id):
         if(not request.user.is_authenticated):
@@ -95,7 +102,6 @@ class get_data_via_browser(APIView):
         response = HttpResponse(file_to_be_sent.File, content_type='application/octet-stream')
         response['Content-Disposition'] = 'attachment; filename=data.bin'
         return response
-
 
 class get_data(APIView):
     def get(self, request):
@@ -134,6 +140,94 @@ class get_data(APIView):
 
                 return Response({"error" : "FILE DOES NOT EXIST", "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
+            return Response({"error" : "INVALID TOKEN", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        error_key = list(serializer.errors.keys())[0]
+        error_value = list(serializer.errors.values())[0][0]
+        error_string = str(error_key) + " : " + str(error_value)
+        return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
+
+class get_data_via_times(APIView):
+    def post(self, request):
+        try:
+            serializer = DataDownloadSerializer(data = request.data)
+        except ParseError:
+            return Response({"error" : "JSON PARSE ERROR", "status" : "FAIL"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+        if(serializer.is_valid()):
+            session_id = serializer.validated_data.get("session_id")
+            token_set = Token.objects.filter(key = session_id)
+
+            if(token_set.exists()):
+
+                token_object = Token.objects.get(key = session_id)
+                current_user = token_object.user
+
+                patient_no = serializer.validated_data.get("patient_no")
+                Start_Time = serializer.validated_data.get("Start_Time")
+                End_Time = serializer.validated_data.get("End_Time")
+
+                if End_Time is not None and Start_Time >= End_Time:
+                    return Response({"error" : "Start_Time must be less than End_Time.", "status" : "FAIL"}, status=status.HTTP_400_BAD_REQUEST)
+
+                serial_number = serializer.validated_data.get("serial_number")
+
+                patient_set = Patient.objects.filter(patient_number = patient_no)
+                device_set = Device.objects.filter(serial_number = serial_number)
+
+                if(patient_set.exists()):
+                    if(device_set.exists()):
+
+                        patient_obj = Patient.objects.get(patient_number = patient_no)
+                        device_obj = Device.objects.get(serial_number = serial_number)
+
+                        data_files_objects = Data.objects.filter(device_id_fk = device_obj, patient_id_fk = patient_obj).order_by('Start_Time')
+
+                        if(End_Time is None):
+                            data_files_objects = data_files_objects.filter(End_Time__gt = Start_Time)
+                        else:
+                            data_files_objects = data_files_objects.filter(End_Time__gt = Start_Time, Start_Time__lt = End_Time)
+
+                        if(data_files_objects.exists()):
+
+                            Start_Time_set = []
+                            End_Time_set = []
+                            Data_start_indexes = []
+                            file_Data = []
+                            no_of_rows = []
+
+                            for data_file_object in data_files_objects:
+
+                                Current_File = data_file_object.File
+
+                                Current_File.open(mode="rb")
+                                content = str(Current_File.read(), 'utf-8').split("\n")
+                                #content = csv.reader(content, delimiter = ",")
+                                #content = [x for x in content if x != []]
+                                content = [x for x in content if x != ""]
+                                Current_File.close()
+                                file_Data += [content]
+                                no_of_rows += [len(content)]
+                                Start_Time_of_Current_File = data_file_object.Start_Time
+                                End_Time_of_Current_File = data_file_object.End_Time
+
+                                Start_Time_set += [Start_Time_of_Current_File]
+                                End_Time_set += [End_Time_of_Current_File]
+
+                            response = {
+                                'status' : 'SUCCESS',
+                                'no_of_files' : len(file_Data),
+                                'Start_Time_set' : Start_Time_set,
+                                'End_Time_set' : End_Time_set,
+                                'No_of_records' : no_of_rows,
+                                'Data' : file_Data
+                            }
+
+                            return Response(response, status = status.HTTP_200_OK)
+
+                        return Response({"error" : "NO RECORDS FOUND FOR THE GIVEN TIME PERIOD.", "status" : "FAIL"}, status=status.HTTP_404_NOT_FOUND)
+                    return Response({"error" : "DEVICE DETAILS NOT FOUND.", "status" : "FAIL"}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"error" : "PATIENT DETAILS NOT FOUND.", "status" : "FAIL"}, status=status.HTTP_404_NOT_FOUND)
             return Response({"error" : "INVALID TOKEN", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
 
         error_key = list(serializer.errors.keys())[0]

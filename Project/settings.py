@@ -23,8 +23,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'i0j2xt_7t-vp39y(!jrik4#4u9&8_o-7pzl)*$3$w6@arpm==x'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-#DEBUG = True
+#DEBUG = False
+DEBUG = True
 
 #ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'iot.orvito.com','.iot.orvito.com' ]
 #ALLOWED_HOSTS = []
@@ -51,11 +51,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'rest_framework',
     'rest_framework.authtoken',
     'django_otp',
     'django_otp.plugins.otp_totp',
     'django_otp.plugins.otp_static',
+
     #'api_main.apps.ApiMainConfig',
     'user_api',
     'data',
@@ -63,6 +65,8 @@ INSTALLED_APPS = [
     'firmware',
     'device',
     'misc',
+
+    'django_cleanup',
 ]
 
 REST_FRAMEWORK = {

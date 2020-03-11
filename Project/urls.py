@@ -6,7 +6,7 @@ from rest_framework import routers
 
 from user_api.views import UserListView, UserCreateView, UserDetailView, ForgotPassword, test_redirect, UserLoginView, UserLogoutView, redirect_404_response
 from device.views import add_device, update_device_settings, delete_device, get_ota, show_devices
-from data.views import post_data_forms, get_data, get_data_via_browser
+from data.views import post_data_forms, get_data, get_data_via_browser, get_data_via_times
 from patient.views import CreatePatient, UpdatePatient, DeletePatient, ShowPatients#, RetrieveUpdateDeletePatient
 from rest_framework.authtoken.views import obtain_auth_token
 
@@ -34,7 +34,7 @@ urlpatterns = [
     path('api/update_device_settings', update_device_settings),
 
     # DATA UPLOAD/DOWNLOAD
-    path('api/get_data', get_data.as_view()),
+    path('api/get_data', get_data_via_times.as_view()),
     path('api/post_data', post_data_forms.as_view()),
 
     # PATIENT URLS
