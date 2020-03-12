@@ -6,7 +6,7 @@ from .serializers import DataUploadSerializer, DataDownloadSerializer, DataUploa
 from rest_framework.views import APIView
 from device.models import Device
 from patient.models import Patient
-from .models import Data
+from .models import Data, Data_filtered
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.exceptions import ParseError
@@ -338,7 +338,7 @@ class get_data_via_times(APIView):
                         device_obj = Device.objects.get(serial_number = serial_number)
 
                         data_files_objects = Data_filtered.objects.filter(device_id_fk = device_obj, patient_id_fk = patient_obj).order_by('Start_Time')
-                        
+
                         if(End_Time is None):
                             data_files_objects = data_files_objects.filter(End_Time__gt = Start_Time)
                         else:
@@ -352,22 +352,47 @@ class get_data_via_times(APIView):
                             file_Data = []
                             no_of_rows = []
 
+                            Current_starttime = 0
+                            Current_endtime = 0
+                            server_unavailability_flag = 0
+                            time_unavailability_flag = 0
+                            count = 0
+
                             for data_file_object in data_files_objects:
 
                                 Current_File_path = data_file_object.File
-                                Current_File = io.open(Current_File_path, encoding = 'utf8')
-                                content = str(Current_File.read()).split("\n")
-                                #content = csv.reader(content, delimiter = ",")
-                                #content = [x for x in content if x != []]
-                                content = [x for x in content if x != ""]
-                                Current_File.close()
-                                file_Data += [content]
-                                no_of_rows += [len(content)]
-                                Start_Time_of_Current_File = data_file_object.Start_Time
-                                End_Time_of_Current_File = data_file_object.End_Time
 
-                                Start_Time_set += [Start_Time_of_Current_File]
-                                End_Time_set += [End_Time_of_Current_File]
+                                if(not path.exists(Current_File_path)):
+                                    server_unavailability_flag = 1
+                                else:
+                                    Current_File = io.open(Current_File_path, encoding = 'utf8')
+                                    content = str(Current_File.read()).split("\n")
+                                    #content = csv.reader(content, delimiter = ",")
+                                    #content = [x for x in content if x != []]
+                                    content = [x for x in content if x != ""]
+                                    Current_File.close()
+                                    file_Data += [content]
+                                    no_of_rows += [len(content)]
+                                    Start_Time_of_Current_File = data_file_object.Start_Time
+                                    End_Time_of_Current_File = data_file_object.End_Time
+
+                                    Start_Time_set += [Start_Time_of_Current_File]
+                                    End_Time_set += [End_Time_of_Current_File]
+                                    if(not count):
+                                        Current_starttime = Start_Time_of_Current_File
+                                        if Current_starttime != Start_Time:
+                                            time_unavailability_flag = 1
+                                        Current_endtime = End_Time_of_Current_File
+                                        count += 1
+                                    elif(count == 1):
+                                        if(Start_Time_of_Current_File != Current_endtime):
+                                            time_unavailability_flag = 1
+                                            count += 1
+                                        Current_endtime = End_Time_of_Current_File
+                                        Current_starttime = Start_Time_of_Current_File
+
+                            if Current_endtime != End_Time:
+                                time_unavailability_flag = 1
 
                             response = {
                                 'status' : 'SUCCESS',
@@ -378,6 +403,12 @@ class get_data_via_times(APIView):
                                 'Data' : file_Data
                             }
 
+                            if(server_unavailability_flag):
+                                response['message'] = 'Only partial data available. Some files missing in server.'
+                            elif(time_unavailability_flag):
+                                response['message'] = 'Only partial data available. Files not available for some time periods.'
+                            else:
+                                response['message'] = 'All data available.'
                             return Response(response, status = status.HTTP_200_OK)
 
                         return Response({"error" : "NO RECORDS FOUND FOR THE GIVEN TIME PERIOD.", "status" : "FAIL"}, status=status.HTTP_404_NOT_FOUND)
