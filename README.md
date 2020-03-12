@@ -75,7 +75,8 @@ python manage.py migrate
 * [Update Patient Details](#update-patient) : http://127.0.0.1/api/update_patient
 * [Delete Patient](#delete-patient) : http://127.0.0.1/api/add_patient
 * [Show Patients](#show-patients) : http://127.0.0.1/api/show_patients
-* [Post File](#post-data) : http://127.0.0.1/api/post_data
+* [Post File - Raw Bin File](#post-raw-data) : http://127.0.0.1/api/post_raw_data
+* [Post File - Proccessed File](#post-roccessed-data) : http://127.0.0.1/api/post_proccessed_data
 * [Download File](#get-data) : http://127.0.0.1/api/get_data
 
 ## API Request Format
@@ -435,36 +436,62 @@ Json Format
 ```
 
 
-### Post Data
+### Post Raw Data
 
 POST Request.
 
-Local host link : http://127.0.0.1/api/post_data
+Local host link : http://127.0.0.1/api/post_raw_data
 
 User Authentication Required.
 
-Form Format
-
-Content-Type : multipart/form-data
+JSON Format
 
 ```
-session_id - ""
-data_id - ""
-device_sl_no - ""
-patient_no - ""
-File - (File to upload)
-Start_Time - "" (epoch time)
-End_Time - "" (epoch time)
-overwrite - ""  (default False)
+{
+  "session_id" : "",
+  "data_id" : "",         -> (Unique)
+  "device_sl_no" : "",
+  "patient_no" : "",
+  "File_location" : "",   -> (Absolute file path)
+  "Start_Time" : "",      -> (Epoch time)
+  "End_Time" : "",        -> (Epoch time)
+  "overwrite" : ""        -> (Optional, Default False)
+}
 ```
 
-"data_id" wil uniquely identify a file.
+"data_id" wil uniquely identify a file. To save the file location of raw bin files.
 
-Must be uploaded via FORM Data.
+### Post Proccessed Data
+
+POST Request.
+
+Local host link : http://127.0.0.1/api/post_proccessed_data
+
+User Authentication Required.
+
+JSON Format
+
+```
+{
+  "session_id" : "",
+  "data_id" : "",         -> (Unique)
+  "device_sl_no" : "",
+  "patient_no" : "",
+  "File_location" : "",   -> (Absolute file path)
+  "Start_Time" : "",      -> (Epoch time)
+  "End_Time" : "",        -> (Epoch time)
+  "overwrite" : ""        -> (Optional, Default False)
+}
+```
+
+"data_id" wil uniquely identify a file. To save file locations of proccessed files.
+
 
 ### Get Data
 
-GET Request.
+POST Request.
+
+To get processed data of a patient recorded from a particular device, between a particular time period.
 
 Local host link : http://127.0.0.1/api/get_data
 
@@ -494,3 +521,22 @@ Format of response :
 }
 
 ```
+
+Here, each element in "Data" contains data from each file in string format. for eg,
+
+```
+{
+  "status" : "SUCCESS",
+  "no_of_files" : "n",
+  "Start_Time_set" : [0, 10, 20, .. ],
+  "End_Time_set" : [10, 20, 30, .. ],
+  "No_of_records" : [4, 4, ..., 4],
+  "Data" :  [
+              ["1.0,2.0,3.0" , "0.0,1.0,2.0" , "0.0,1.0,2.0" , "0.0,1.0,2.0"] ,   -> (file 1, 4 records)
+              ["1.1,2.4,5.3" , "1.1,2.4,5.3" , "1.1,2.4,5.3" , "1.1,2.4,5.3"] ,   -> (file 2, 4 records)
+              ... ,
+              ["1.1,2.4,5.3" , "1.1,2.4,5.3" , "1.1,2.4,5.3" , "1.1,2.4,5.3"] ,   -> (file n, 4 records)
+            ]
+}
+```
+Please note that each string will contain comma seperated values up to the number of ECG signals that the file contains.
