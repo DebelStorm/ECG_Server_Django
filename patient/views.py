@@ -112,6 +112,7 @@ class UpdatePatient(APIView):
 
                     if(patient_set.exists()):
 
+                        patient_obj = Patient.objects.get(patient_number = patient_number)
                         user_pat_set = user_patient_mapping.objects.filter(user_id_fk = current_user, patient_id_fk = patient_obj)
 
                         if(user_pat_set.exists()):
