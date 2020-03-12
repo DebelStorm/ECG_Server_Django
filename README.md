@@ -517,7 +517,8 @@ Format of response :
 	"Start_Time_set" : [],
 	"End_Time_set" : [],
 	"No_of_records" : [],
-	"Data" : [ [] , [] , ... , [] ]
+	"Data" : [ [] , [] , ... , [] ],
+  "message" : ""
 }
 
 ```
@@ -542,7 +543,9 @@ Here, each element in "Data" contains data from each file in string format. for 
 ```
 Please note that each string will contain comma seperated values up to the number of ECG signals that the file contains.
 
+There will be a message if the "status" is "SUCCESS".
+
 There can be 3 messages :
-* All files are available : 'All data available.'
-* Some files are missing in the server but some available between the given time period : 'Only partial data available. Some files missing in server.'
-* Some files not present for some particular time period between the given start and end time stamp. But others may or may not be available : 'Only partial data available. Files not available for some time periods.'
+* If All files are available : 'All data available.'
+* Some files are missing in the server but their file locations are present in the database. : 'Only partial data available. Some files missing in server.'
+* Some files not present at all (both in db and location) for some particular time period between the given start and end time stamp. : 'Only partial data available. Files not available for some time periods.'
