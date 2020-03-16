@@ -43,6 +43,10 @@ pyotp               2.3.0
 django-cleanup      4.0.0  
 numpy               1.18.1
 scipy               1.4.1
+
+12 March :
+
+pandas              1.0.1
 ```
 
 The packages can be also installed using the following command
@@ -518,7 +522,7 @@ Format of response :
 	"End_Time_set" : [],
 	"No_of_records" : [],
 	"Data" : [ [] , [] , ... , [] ],
-  "message" : ""
+    "message" : ""
 }
 
 ```
@@ -533,10 +537,9 @@ Here, each element in "Data" contains data from each file in string format. for 
   "End_Time_set" : [10, 20, 30, .. ],
   "No_of_records" : [4, 4, ..., 4],
   "Data" :  [
-              ["1.0,2.0,3.0" , "0.0,1.0,2.0" , "0.0,1.0,2.0" , "0.0,1.0,2.0"] ,   -> (file 1, 4 records)
-              ["1.1,2.4,5.3" , "1.1,2.4,5.3" , "1.1,2.4,5.3" , "1.1,2.4,5.3"] ,   -> (file 2, 4 records)
-              ... ,
-              ["1.1,2.4,5.3" , "1.1,2.4,5.3" , "1.1,2.4,5.3" , "1.1,2.4,5.3"] ,   -> (file n, 4 records)
+              [["1.0",2.0","3.0"] , ["0.0","1.0","2.0"] , ["0.0",1.0","2.0"] , ["0.0","1.0","2.0"]] ,
+              [["1.1","2.4","5.3"] , ["1.1","2.4","5.3"] , ["1.1","2.4","5.3"] , ["1.1","2.4","5.3"]] ,
+
             ],
   "message" : "All data available."
 }

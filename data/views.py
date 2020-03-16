@@ -16,6 +16,7 @@ from rest_framework.authtoken.models import Token
 import csv
 from os import path
 import io
+import numpy as np
 
 # Create your views here.
 
@@ -366,13 +367,18 @@ class get_data_via_times(APIView):
                                     server_unavailability_flag = 1
                                 else:
                                     Current_File = io.open(Current_File_path, encoding = 'utf8')
+
                                     content = str(Current_File.read()).split("\n")
-                                    #content = csv.reader(content, delimiter = ",")
-                                    #content = [x for x in content if x != []]
-                                    content = [x for x in content if x != ""]
+                                    content = csv.reader(content, delimiter = ",")
+                                    content = [x for x in content if x != []]
+
+                                    no_of_rows_current_file = len(content)
+                                    content = np.asarray(content).T.tolist()
+
+                                    #content = [x for x in content if x != ""]
                                     Current_File.close()
                                     file_Data += [content]
-                                    no_of_rows += [len(content)]
+                                    no_of_rows += [no_of_rows_current_file]
                                     Start_Time_of_Current_File = data_file_object.Start_Time
                                     End_Time_of_Current_File = data_file_object.End_Time
 
@@ -394,13 +400,46 @@ class get_data_via_times(APIView):
                             if Current_endtime != End_Time:
                                 time_unavailability_flag = 1
 
+                            no_of_files_var = len(file_Data)
+
+                            final_data = []
+
+                            for i in range(12):
+                                con_array = []
+                                for file in file_Data:
+                                    con_array += file[i]
+
+                                final_data += [con_array]              # Array Format
+                                #final_data += [','.join(con_array)]     # Text Format
+
+                            # Slicing of last and first file
+
+                            frequency = 1000
+
+                            if(no_of_files_var > 0):
+
+                                start_time_slice = round((Start_Time - Start_Time_set[0]) * frequency)
+                                end_time_slice = round((End_Time_set[-1] - End_Time) * frequency)
+
+                                if(start_time_slice > 0):
+                                    for i in range(len(final_data)):
+                                        final_data[i] = final_data[i][start_time_slice : ]
+                                    Start_Time_set[0] = Start_Time
+                                    no_of_rows[0] -= start_time_slice
+
+                                if(end_time_slice > 0):
+                                    for i in range(len(final_data)):
+                                        final_data[i] = final_data[i][ : -(end_time_slice)]
+                                    End_Time_set[-1] = End_Time
+                                    no_of_rows[-1] -= end_time_slice
+
                             response = {
                                 'status' : 'SUCCESS',
-                                'no_of_files' : len(file_Data),
+                                'no_of_files' : no_of_files_var,
                                 'Start_Time_set' : Start_Time_set,
                                 'End_Time_set' : End_Time_set,
                                 'No_of_records' : no_of_rows,
-                                'Data' : file_Data
+                                'Data' : final_data,
                             }
 
                             if(server_unavailability_flag):
