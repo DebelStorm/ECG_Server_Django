@@ -602,7 +602,7 @@ class get_data_via_times(APIView):
                                 response['avg_QTc'] = [int(np.mean(avgqtc))] + avgqtc
 
 
-                                response['avg_HRV'] = avg_HRV
+                                response['HRV'] = avg_HRV
                                 response['BPM'] = BPM
                                 response['BDFE_flags'] = BDFE_flags
                                 response['start_time_slice'] = start_time_slice

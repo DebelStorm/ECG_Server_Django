@@ -562,7 +562,7 @@ Format of response :
     "avg_PR": [...],        -> ^
     "avg_QT": [...],        -> ^
     "avg_QTc": [...],       -> ^
-    "avg_HRV": [...],       -> ^
+    "HRV": [...],           -> ^
     "BPM": [...],           -> ^
     "BDFE_flags": [...],    -> ^
 
