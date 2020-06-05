@@ -43,3 +43,10 @@ class Data_filtered(models.Model):
 
     def __str__(self):
         return 'File_ID: %s, Patient: %s , User: %s , Device: %s' % (self.data_file_id, self.patient_id_fk, self.user_id_fk, self.patient_id_fk)
+
+class BD_FE(models.Model):
+    Parent_file = models.OneToOneField(Data_filtered, on_delete = models.CASCADE, primary_key = True)
+    File = models.CharField(max_length = 100)
+
+    def __str__(self):
+        return 'File_ID: %s, Patient: %s , User: %s , Device: %s' % (self.Parent_file.data_file_id, self.Parent_file.patient_id_fk, self.Parent_file.user_id_fk, self.Parent_file.patient_id_fk)

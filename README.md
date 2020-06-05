@@ -80,7 +80,8 @@ python manage.py migrate
 * [Delete Patient](#delete-patient) : http://127.0.0.1/api/add_patient
 * [Show Patients](#show-patients) : http://127.0.0.1/api/show_patients
 * [Post File - Raw Bin File](#post-raw-data) : http://127.0.0.1/api/post_raw_data
-* [Post File - Proccessed File](#post-roccessed-data) : http://127.0.0.1/api/post_proccessed_data
+* [Post File - Proccessed File](#post-proccessed-data) : http://127.0.0.1/api/post_proccessed_data
+* [Post File - BDFE File](#post-BDFE-data) :  http://127.0.0.1/api/post_bdfe
 * [Download File](#get-data) : http://127.0.0.1/api/get_data
 
 ## API Request Format
@@ -490,6 +491,26 @@ JSON Format
 
 "data_id" wil uniquely identify a file. To save file locations of proccessed files.
 
+### Post BDFE Data
+
+POST Request.
+
+Local host link : http://127.0.0.1/api/post_bdfe
+
+User Authentication Required.
+
+JSON Format
+
+```
+{
+  "session_id" : "",
+  "data_id" : "",         
+  "File_location" : "",   
+  "overwrite" : ""  -> (Optional, Default False)   
+}
+```
+
+This api is used to save the bdfe csv file created during filtering. Linked with filtered file. "data_id" wil uniquely identify a processed file. "File_location" is the full path to the bdfe file processed for the above filtered file with the data_id.
 
 ### Get Data
 
@@ -507,9 +528,15 @@ User Authentication Required.
 	"serial_number" : "",
 	"patient_no" : "",
 	"Start_Time" : "",
-	"End_Time" : ""
+	"End_Time" : "",
+    "download_mode" : "",     -> Optional, default = 0
+    "include_bdfe_index" : "" -> Optional, default = 0
 }
 ```
+
+download_mode : 0 or 1, 0 for getting just filtered data. 1 for Getting filtered data + BDFE values. Optional parameter.
+
+include_bdfe_index : 0 or 1, 0 for getting only avg_interval values in BDFE. 1 for getting both avg_values and boundaries, R_Peaks, etc. Only need to be used if download_mode is 1. Optional parameter.
 
 Response will contain filtered data from all files between "Start_Time" and "End_Time" for the patient from the given device.
 
@@ -522,10 +549,29 @@ Format of response :
 	"End_Time_set" : [],
 	"No_of_records" : [],
 	"Data" : [ [] , [] , ... , [] ],
+
+    "Boundaries": [...],    -> These 5 when download_mode = 1, include_bdfe_index = 1.
+    "R_peaks": [...],       -> ^
+    "P_wave": [...],        -> ^
+    "QRS_Wave": [...],      -> ^
+    "T_Wave": [...],        -> ^
+
+    "avg_P": [...],         -> These 9 when download_mode = 1, irrespective of include_bdfe_index.
+    "avg_QRS": [...],       -> ^
+    "avg_T": [...],         -> ^
+    "avg_PR": [...],        -> ^
+    "avg_QT": [...],        -> ^
+    "avg_QTc": [...],       -> ^
+    "avg_HRV": [...],       -> ^
+    "BPM": [...],           -> ^
+    "BDFE_flags": [...],    -> ^
+
     "message" : ""
 }
 
 ```
+
+Each average is an array of 13 elements. First element is the total average across all 12 leads, the rest are individual averages for each consecutive lead.
 
 Here, each element in "Data" contains data from each file in string format. for eg,
 
@@ -537,14 +583,23 @@ Here, each element in "Data" contains data from each file in string format. for 
   "End_Time_set" : [10, 20, 30, .. ],
   "No_of_records" : [4, 4, ..., 4],
   "Data" :  [
-              [["1.0",2.0","3.0"] , ["0.0","1.0","2.0"] , ["0.0",1.0","2.0"] , ["0.0","1.0","2.0"]] ,
-              [["1.1","2.4","5.3"] , ["1.1","2.4","5.3"] , ["1.1","2.4","5.3"] , ["1.1","2.4","5.3"]] ,
-
+              ["1.0",2.0",... ,"3.0"],
+              ["0.0","1.0",... ,"2.0"],
+              ["0.0",1.0",... ,"2.0"] ,
+              ["0.0","1.0",... ,"2.0"] ,
+              ["1.1","2.4",... ,"5.3"] ,
+              ["1.1","2.4",... ,"5.3"] ,
+              ["1.1","2.4",... ,"5.3"] ,
+              ["1.1","2.4",... ,"5.3"] ,
+              ["0.0",1.0",... ,"2.0"] ,
+              ["0.0","1.0",... ,"2.0"] ,
+              ["1.1","2.4",... ,"5.3"] ,
+              ["1.1","2.4",... ,"5.3"]
             ],
   "message" : "All data available."
 }
 ```
-Please note that each string will contain comma seperated values up to the number of ECG signals that the file contains.
+Please note that each array will contain comma seperated values of up to the number of ECG signals that all file contains.
 
 There will be a message if the "status" is "SUCCESS".
 
