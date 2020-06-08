@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.parsers import JSONParser, FormParser, MultiPartParser, FileUploadParser
 from rest_framework.decorators import api_view
 from .forms import DataUploadForm
-from .serializers import DataUploadSerializer, DataDownloadSerializer, DataUploadSerializerJSON, BDFE_DataUploadSerializer
+from .serializers import DataUploadSerializer, DataDownloadSerializer, BDFE_DataUploadSerializer
 from rest_framework.views import APIView
 from device.models import Device
 from patient.models import Patient
@@ -29,10 +29,10 @@ def merge_array(a):
         final_a += [signal]
     return final_a
 
-class post_data_JSON(APIView):
+class post_data_raw(APIView):
     def post(self, request, *args, **kwargs):
         try:
-            serializer = DataUploadSerializerJSON(data = request.data)
+            serializer = DataUploadSerializer(data = request.data)
         except ParseError:
             return Response({"error" : "JSON PARSE ERROR", "status" : "FAIL"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
@@ -102,10 +102,10 @@ class post_data_JSON(APIView):
         error_string = str(error_key) + " : " + str(error_value)
         return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
-class post_proccessed_data_JSON(APIView):
+class post_data_proccessed(APIView):
     def post(self, request, *args, **kwargs):
         try:
-            serializer = DataUploadSerializerJSON(data = request.data)
+            serializer = DataUploadSerializer(data = request.data)
         except ParseError:
             return Response({"error" : "JSON PARSE ERROR", "status" : "FAIL"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
@@ -230,51 +230,6 @@ class post_bdfe(APIView):
         return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
 
 class get_data(APIView):
-    def get(self, request):
-        try:
-            serializer = DataDownloadSerializer(data = request.data)
-        except ParseError:
-            return Response({"error" : "JSON PARSE ERROR", "status" : "FAIL"}, status=status.HTTP_406_NOT_ACCEPTABLE)
-
-        if(serializer.is_valid()):
-            session_id = serializer.validated_data.get("session_id")
-            token_set = Token.objects.filter(key = session_id)
-
-            if(token_set.exists()):
-
-                token_object = Token.objects.get(key = session_id)
-                current_user = token_object.user
-
-                data_id = serializer.validated_data.get("data_id")
-                get_bdfe = serializer.validated_data.get("get_bdfe")
-
-                if(Data.objects.filter(data_file_id = data_id).exists()):
-
-                    file_to_be_sent = Data.objects.get(data_file_id = data_id)
-
-                    if(current_user == file_to_be_sent.user_id_fk):
-
-                        if(file_to_be_sent.File.storage.exists(file_to_be_sent.File.name)):
-
-                            response = HttpResponse(file_to_be_sent.File, content_type='text/plain')
-                            response['Content-Disposition'] = 'attachment; filename=data.bin'
-
-                            return response
-
-                        return Response({"error" : "FILE MISSING IN SERVER", "status" : "FAIL"}, status=status.HTTP_404_NOT_FOUND)
-
-                    return Response({"error" : "UNAUTHORIZED", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
-
-                return Response({"error" : "FILE DOES NOT EXIST", "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
-
-            return Response({"error" : "INVALID TOKEN", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
-
-        error_key = list(serializer.errors.keys())[0]
-        error_value = list(serializer.errors.values())[0][0]
-        error_string = str(error_key) + " : " + str(error_value)
-        return Response({"error" : error_string, "status" : "FAIL"}, status = status.HTTP_400_BAD_REQUEST)
-
-class get_data_via_times(APIView):
     def post(self, request):
         try:
             serializer = DataDownloadSerializer(data = request.data)
