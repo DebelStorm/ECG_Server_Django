@@ -23,7 +23,7 @@ class Data(models.Model):
     user_id_fk = models.ForeignKey(User, on_delete = models.CASCADE) # or PROTECT
     patient_id_fk = models.ForeignKey(Patient, on_delete = models.CASCADE) # or PROTECT
     #File = models.FileField(upload_to = user_directory_path)
-    File = models.CharField(max_length = 100)
+    File = models.CharField(max_length = 300)
     Start_Time = models.BigIntegerField()
     End_Time = models.BigIntegerField()
 
@@ -37,7 +37,7 @@ class Data_filtered(models.Model):
     user_id_fk = models.ForeignKey(User, on_delete = models.CASCADE) # or PROTECT
     patient_id_fk = models.ForeignKey(Patient, on_delete = models.CASCADE) # or PROTECT
     #File = models.FileField(upload_to = user_directory_path_filtered)
-    File = models.CharField(max_length = 100)
+    File = models.CharField(max_length = 300)
     Start_Time = models.BigIntegerField()
     End_Time = models.BigIntegerField()
 
@@ -46,7 +46,7 @@ class Data_filtered(models.Model):
 
 class BD_FE(models.Model):
     Parent_file = models.OneToOneField(Data_filtered, on_delete = models.CASCADE, primary_key = True)
-    File = models.CharField(max_length = 100)
+    File = models.CharField(max_length = 300)
 
     def __str__(self):
         return 'File_ID: %s, Patient: %s , User: %s , Device: %s' % (self.Parent_file.data_file_id, self.Parent_file.patient_id_fk, self.Parent_file.user_id_fk, self.Parent_file.patient_id_fk)
