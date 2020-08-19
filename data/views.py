@@ -432,6 +432,7 @@ class get_data(APIView):
                             File_Length = 10000
 
                             if(no_of_files_var > 0):
+
                                 start_time_slice = round((Start_Time - Start_Time_set[0]) * frequency)
                                 end_time_slice = round((End_Time_set[-1] - End_Time) * frequency)
 
@@ -502,6 +503,10 @@ class get_data(APIView):
 
                                     # Slice first and last parts of BDFE and adjust accordingly
                                     if(no_of_files_var > 0):
+
+                                        start_time_slice = round((Start_Time - Start_Time_set[0]) * frequency)
+                                        end_time_slice = round((End_Time_set[-1] - End_Time) * frequency)
+
                                         try:
                                             if(start_time_slice > 0):
                                                 for i in range(len(Boundaries)):
@@ -544,7 +549,8 @@ class get_data(APIView):
                                         except:
                                             pass
 
-                                        # Push the values to response
+
+                                    # Push the values to response
 
                                     response['Boundaries'] = Boundaries
                                     response['R_peaks'] = R_peaks
@@ -552,20 +558,41 @@ class get_data(APIView):
                                     response['QRS_Wave'] = QRS_Wave
                                     response['T_Wave'] = T_Wave
 
-                                avgp = [int(np.mean(x)) for x in np.asarray(avg_P).T.tolist()]
-                                avgqrs = [int(np.mean(x)) for x in np.asarray(avg_QRS).T.tolist()]
-                                avgt = [int(np.mean(x)) for x in np.asarray(avg_T).T.tolist()]
-                                avgpr = [int(np.mean(x)) for x in np.asarray(avg_PR).T.tolist()]
-                                avgqt = [int(np.mean(x)) for x in np.asarray(avg_QT).T.tolist()]
-                                avgqtc = [int(np.mean(x)) for x in np.asarray(avg_QTc).T.tolist()]
+                                try:
+                                    avgp = [int(np.mean(x)) for x in np.asarray(avg_P).T.tolist()]
+                                    response['avg_P'] = [int(np.mean(avgp))] + avgp
+                                except:
+                                    response['avg_P'] = []
 
-                                response['avg_P'] = [int(np.mean(avgp))] + avgp
-                                response['avg_QRS'] = [int(np.mean(avgqrs))] + avgqrs
-                                response['avg_T'] = [int(np.mean(avgt))] + avgt
-                                response['avg_PR'] = [int(np.mean(avgpr))] + avgpr
-                                response['avg_QT'] = [int(np.mean(avgqt))] + avgqt
-                                response['avg_QTc'] = [int(np.mean(avgqtc))] + avgqtc
+                                try:
+                                    avgqrs = [int(np.mean(x)) for x in np.asarray(avg_QRS).T.tolist()]
+                                    response['avg_QRS'] = [int(np.mean(avgqrs))] + avgqrs
+                                except:
+                                    response['avg_QRS'] = []
 
+                                try:
+                                    avgt = [int(np.mean(x)) for x in np.asarray(avg_T).T.tolist()]
+                                    response['avg_T'] = [int(np.mean(avgt))] + avgt
+                                except:
+                                    response['avg_T'] = []
+
+                                try:
+                                    avgpr = [int(np.mean(x)) for x in np.asarray(avg_PR).T.tolist()]
+                                    response['avg_PR'] = [int(np.mean(avgpr))] + avgpr
+                                except:
+                                    response['avg_PR'] = []
+
+                                try:
+                                    avgqt = [int(np.mean(x)) for x in np.asarray(avg_QT).T.tolist()]
+                                    response['avg_QT'] = [int(np.mean(avgqt))] + avgqt
+                                except:
+                                    response['avg_QT'] = []
+
+                                try:
+                                    avgqtc = [int(np.mean(x)) for x in np.asarray(avg_QTc).T.tolist()]
+                                    response['avg_QTc'] = [int(np.mean(avgqtc))] + avgqtc
+                                except:
+                                    response['avg_QTc'] = []
 
                                 response['HRV'] = avg_HRV
 
@@ -573,9 +600,10 @@ class get_data(APIView):
                                     BPM = [round(np.mean(BPM))]
 
                                 response['BPM'] = BPM
-                                response['BDFE_flags'] = BDFE_flags
-                                response['start_time_slice'] = start_time_slice
-                                response['end_time_slice'] = end_time_slice
+
+                                #response['BDFE_flags'] = BDFE_flags
+                                #response['start_time_slice'] = start_time_slice
+                                #response['end_time_slice'] = end_time_slice
 
                             if(server_unavailability_flag):
                                 response['message'] = 'Only partial data available. Some files missing in server. '
