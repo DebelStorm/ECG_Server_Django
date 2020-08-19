@@ -431,30 +431,31 @@ class get_data(APIView):
 
                             File_Length = 10000
 
-                            start_time_slice = round((Start_Time - Start_Time_set[0]) * frequency)
-                            end_time_slice = round((End_Time_set[-1] - End_Time) * frequency)
-
-                            max_length = sum(no_of_rows)
-                            
                             if(no_of_files_var > 0):
+                                start_time_slice = round((Start_Time - Start_Time_set[0]) * frequency)
+                                end_time_slice = round((End_Time_set[-1] - End_Time) * frequency)
 
-                                if(start_time_slice > 0):
-                                    for i in range(len(final_data)):
-                                        final_data[i] = final_data[i][start_time_slice : ]
-                                    Start_Time_set[0] = Start_Time
-                                    no_of_rows[0] -= start_time_slice
+                                max_length = sum(no_of_rows)
 
-                                if(end_time_slice > 0):
-                                    for i in range(len(final_data)):
-                                        final_data[i] = final_data[i][ : -(end_time_slice)]
-                                    End_Time_set[-1] = End_Time
-                                    no_of_rows[-1] -= end_time_slice
+                                if(no_of_files_var > 0):
 
-                            if len(End_Time_set) > 0 and End_Time_set[-1] != End_Time :
-                                 time_unavailability_flag = 1
+                                    if(start_time_slice > 0):
+                                        for i in range(len(final_data)):
+                                            final_data[i] = final_data[i][start_time_slice : ]
+                                        Start_Time_set[0] = Start_Time
+                                        no_of_rows[0] -= start_time_slice
 
-                            if len(Start_Time_set) > 0 and Start_Time_set[0] != Start_Time :
-                                 time_unavailability_flag = 1
+                                    if(end_time_slice > 0):
+                                        for i in range(len(final_data)):
+                                            final_data[i] = final_data[i][ : -(end_time_slice)]
+                                        End_Time_set[-1] = End_Time
+                                        no_of_rows[-1] -= end_time_slice
+
+                                if len(End_Time_set) > 0 and End_Time_set[-1] != End_Time :
+                                     time_unavailability_flag = 1
+
+                                if len(Start_Time_set) > 0 and Start_Time_set[0] != Start_Time :
+                                     time_unavailability_flag = 1
 
                             response = {
                                 'status' : 'SUCCESS',
@@ -469,79 +470,82 @@ class get_data(APIView):
 
                             if(download_mode):
 
-                                # Send the BDFE Values in proper Format
-
-                                # Adjust to match appended length
-                                file_len_count = 0
-                                stride = 0
-                                for i in range(len(BDFE_flags)):
-                                    if(BDFE_flags[i]):
-                                        stride += file_len_array[file_len_count]
-                                        for j in range(12):
-                                            Boundaries[i][j] = [value + stride for value in Boundaries[i][j]]
-                                            R_peaks[i][j] = [value + stride for value in R_peaks[i][j]]
-                                            P_Wave[i][j] = [value + stride for value in P_Wave[i][j]]
-                                            QRS_Wave[i][j] = [value + stride for value in QRS_Wave[i][j]]
-                                            T_Wave[i][j] = [value + stride for value in T_Wave[i][j]]
-                                        file_len_count += 1
-
-                                # Append each BDFE parameter
-                                rPeakMaxLength = 0
-
-                                if(len(Boundaries)):
-                                    Boundaries = merge_array(Boundaries)
-                                    R_peaks = merge_array(R_peaks)
-                                    P_Wave = merge_array(P_Wave)
-                                    QRS_Wave = merge_array(QRS_Wave)
-                                    T_Wave = merge_array(T_Wave)
-
-                                    rPeakMaxLength = max([len(array) for array in R_peaks])
-                                # Slice first and last parts of BDFE and adjust accordingly
-                                try:
-                                    if(start_time_slice > 0):
-                                        for i in range(len(Boundaries)):
-                                            Boundaries[i] = [value - start_time_slice for value in Boundaries[i] if value > start_time_slice]
-                                            R_peaks[i] = [value - start_time_slice for value in R_peaks[i] if value > start_time_slice]
-                                            P_Wave[i] = [value - start_time_slice for value in P_Wave[i] if value > start_time_slice]
-                                            QRS_Wave[i] = [value - start_time_slice for value in QRS_Wave[i] if value > start_time_slice]
-                                            T_Wave[i] = [value - start_time_slice for value in T_Wave[i] if value > start_time_slice]
-
-                                    if(not R_peaks):
-                                        avg_HRV = []
-                                    else:
-                                        newRPeakMaxLength = max([len(array) for array in R_peaks])
-                                        avg_HRV = avg_HRV[rPeakMaxLength - newRPeakMaxLength : ]
-                                        rPeakMaxLength = newRPeakMaxLength
-
-                                    if(end_time_slice > 0):
-                                        if(start_time_slice > 0):
-                                            for i in range(len(Boundaries)):
-                                                Boundaries[i] = [value for value in Boundaries[i] if value + start_time_slice < max_length - end_time_slice]
-                                                R_peaks[i] = [value for value in R_peaks[i] if value + start_time_slice < max_length - end_time_slice]
-                                                P_Wave[i] = [value for value in P_Wave[i] if value + start_time_slice < max_length - end_time_slice]
-                                                QRS_Wave[i] = [value for value in QRS_Wave[i] if value + start_time_slice < max_length - end_time_slice]
-                                                T_Wave[i] = [value for value in T_Wave[i] if value + start_time_slice < max_length - end_time_slice]
-                                        else:
-                                            for i in range(len(Boundaries)):
-                                                Boundaries[i] = [value for value in Boundaries[i] if value < max_length - end_time_slice]
-                                                R_peaks[i] = [value for value in R_peaks[i] if value < max_length - end_time_slice]
-                                                P_Wave[i] = [value for value in P_Wave[i] if value < max_length - end_time_slice]
-                                                QRS_Wave[i] = [value for value in QRS_Wave[i] if value < max_length - end_time_slice]
-                                                T_Wave[i] = [value for value in T_Wave[i] if value < max_length - end_time_slice]
-
-                                    if(not R_peaks):
-                                        avg_HRV = []
-                                    else:
-                                        newRPeakMaxLength = max([len(array) for array in R_peaks])
-                                        if((rPeakMaxLength - newRPeakMaxLength) > 0):
-                                            avg_HRV = avg_HRV[: -(rPeakMaxLength - newRPeakMaxLength)]
-                                        rPeakMaxLength = newRPeakMaxLength
-                                except:
-                                    pass
-
-                                # Push the values to response
-
                                 if(include_bdfe_index):
+
+                                    # Send the BDFE Values in proper Format
+
+                                    # Adjust to match appended length
+                                    file_len_count = 0
+                                    stride = 0
+                                    for i in range(len(BDFE_flags)):
+                                        if(BDFE_flags[i]):
+                                            stride += file_len_array[file_len_count]
+                                            for j in range(12):
+                                                Boundaries[i][j] = [value + stride for value in Boundaries[i][j]]
+                                                R_peaks[i][j] = [value + stride for value in R_peaks[i][j]]
+                                                P_Wave[i][j] = [value + stride for value in P_Wave[i][j]]
+                                                QRS_Wave[i][j] = [value + stride for value in QRS_Wave[i][j]]
+                                                T_Wave[i][j] = [value + stride for value in T_Wave[i][j]]
+                                            file_len_count += 1
+
+                                    # Append each BDFE parameter
+                                    rPeakMaxLength = 0
+
+                                    if(len(Boundaries)):
+                                        Boundaries = merge_array(Boundaries)
+                                        R_peaks = merge_array(R_peaks)
+                                        P_Wave = merge_array(P_Wave)
+                                        QRS_Wave = merge_array(QRS_Wave)
+                                        T_Wave = merge_array(T_Wave)
+
+                                        rPeakMaxLength = max([len(array) for array in R_peaks])
+
+                                    # Slice first and last parts of BDFE and adjust accordingly
+                                    if(no_of_files_var > 0):
+                                        try:
+                                            if(start_time_slice > 0):
+                                                for i in range(len(Boundaries)):
+                                                    Boundaries[i] = [value - start_time_slice for value in Boundaries[i] if value > start_time_slice]
+                                                    R_peaks[i] = [value - start_time_slice for value in R_peaks[i] if value > start_time_slice]
+                                                    P_Wave[i] = [value - start_time_slice for value in P_Wave[i] if value > start_time_slice]
+                                                    QRS_Wave[i] = [value - start_time_slice for value in QRS_Wave[i] if value > start_time_slice]
+                                                    T_Wave[i] = [value - start_time_slice for value in T_Wave[i] if value > start_time_slice]
+
+                                            if(not R_peaks):
+                                                avg_HRV = []
+                                            else:
+                                                newRPeakMaxLength = max([len(array) for array in R_peaks])
+                                                avg_HRV = avg_HRV[rPeakMaxLength - newRPeakMaxLength : ]
+                                                rPeakMaxLength = newRPeakMaxLength
+
+                                            if(end_time_slice > 0):
+                                                if(start_time_slice > 0):
+                                                    for i in range(len(Boundaries)):
+                                                        Boundaries[i] = [value for value in Boundaries[i] if value + start_time_slice < max_length - end_time_slice]
+                                                        R_peaks[i] = [value for value in R_peaks[i] if value + start_time_slice < max_length - end_time_slice]
+                                                        P_Wave[i] = [value for value in P_Wave[i] if value + start_time_slice < max_length - end_time_slice]
+                                                        QRS_Wave[i] = [value for value in QRS_Wave[i] if value + start_time_slice < max_length - end_time_slice]
+                                                        T_Wave[i] = [value for value in T_Wave[i] if value + start_time_slice < max_length - end_time_slice]
+                                                else:
+                                                    for i in range(len(Boundaries)):
+                                                        Boundaries[i] = [value for value in Boundaries[i] if value < max_length - end_time_slice]
+                                                        R_peaks[i] = [value for value in R_peaks[i] if value < max_length - end_time_slice]
+                                                        P_Wave[i] = [value for value in P_Wave[i] if value < max_length - end_time_slice]
+                                                        QRS_Wave[i] = [value for value in QRS_Wave[i] if value < max_length - end_time_slice]
+                                                        T_Wave[i] = [value for value in T_Wave[i] if value < max_length - end_time_slice]
+
+                                            if(not R_peaks):
+                                                avg_HRV = []
+                                            else:
+                                                newRPeakMaxLength = max([len(array) for array in R_peaks])
+                                                if((rPeakMaxLength - newRPeakMaxLength) > 0):
+                                                    avg_HRV = avg_HRV[: -(rPeakMaxLength - newRPeakMaxLength)]
+                                                rPeakMaxLength = newRPeakMaxLength
+                                        except:
+                                            pass
+
+                                        # Push the values to response
+
                                     response['Boundaries'] = Boundaries
                                     response['R_peaks'] = R_peaks
                                     response['P_Wave'] = P_Wave
@@ -564,6 +568,10 @@ class get_data(APIView):
 
 
                                 response['HRV'] = avg_HRV
+
+                                if(len(BPM) > 0):
+                                    BPM = [round(np.mean(BPM))]
+
                                 response['BPM'] = BPM
                                 response['BDFE_flags'] = BDFE_flags
                                 response['start_time_slice'] = start_time_slice

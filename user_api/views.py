@@ -242,8 +242,8 @@ class ForgotPassword(APIView):
                         current_user.profile.save()
                         try:
                             send_mail("OTP", key, EMAIL_HOST_USER, [user_mail], fail_silently=False,)
-                        except BadHeaderError:
-                            return Response({"error": "Unable to send OTP. Invalid header found.", "status" : "FAIL"})
+                        except :
+                            return Response({"error": "Server Error. Unable to send OTP.", "status" : "FAIL"})
                         return Response({"status" : "SUCCESS", "msg" : "OTP Sent to registered mail."}, status = status.HTTP_200_OK)
 
                     else:

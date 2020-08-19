@@ -207,12 +207,20 @@ def delete_device(request):
                     device_to_be_deleted = Device.objects.get(serial_number = serializer.validated_data.get('serial_number'))
                     set2 = user_device_mapping.objects.filter(user_id_fk = current_user, device_id_fk = device_to_be_deleted)
 
-                    if(set2.exists() or current_user.is_staff):
+                    if(set2.exists()):
 
-                        device_to_be_deleted.delete()
+                        ud_map = user_device_mapping.objects.get(user_id_fk = current_user, device_id_fk = device_to_be_deleted)
+                        ud_map.delete()
+
+                        set3 = user_device_mapping.objects.filter(device_id_fk = device_to_be_deleted)
+
+                        if(not set3.exists()):
+
+                            device_to_be_deleted.delete()
+
                         return Response({"status" : "SUCCESS"}, status=status.HTTP_200_OK)
 
-                    return Response({"error" : "UNAUTHORIZED", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
+                    return Response({"error" : "USER NOT REGISTERED TO THIS DEVICE", "status" : "FAIL"}, status=status.HTTP_401_UNAUTHORIZED)
 
                 return Response({"error" : "DEVICE DOES NOT EXIST", "status" : "FAIL"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -244,19 +252,31 @@ def add_device(request):
 
                 if(not Device.objects.filter(serial_number = serializer.validated_data.get('serial_number')).exists()):
 
+                    Firmware_Version_id = serializer.validated_data.get('Firmware_version_id')
+                    Firmware_version_number = serializer.validated_data.get('Firmware_version_number')
+
                     device_name = serializer.validated_data.get("device_name")
                     if(device_name is None):
                         device_name = "DefaultDevice"
+
                     serial_number = serializer.validated_data.get("serial_number")
                     Mac_id = serializer.validated_data.get("Mac_id")
                     if(Mac_id is None):
                         Mac_id = "N/A"
+
                     Num_of_Leads = serializer.validated_data.get("Num_of_Leads")
                     if(Num_of_Leads is None):
                         Num_of_Leads = 12
+
                     new_device = Device(device_name = device_name, serial_number = serial_number, Mac_id = Mac_id, Num_of_Leads = Num_of_Leads)
                     new_device.save()
-                    add_firmware = Firmware_Version(device_id_fk = new_device)
+
+                    if(Firmware_Version_id != None):
+                        Firmware_Version_id = ' N/A '
+                    if(Firmware_version_number != None):
+                        Firmware_version_number = ' N/A '
+
+                    add_firmware = Firmware_Version(device_id_fk = new_device, Firmware_Version_id = Firmware_Version_id, Firmware_version_number = Firmware_version_number)
                     add_firmware.save()
 
                 new_device = Device.objects.get(serial_number = serializer.validated_data.get('serial_number'))

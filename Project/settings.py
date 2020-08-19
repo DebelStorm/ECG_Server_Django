@@ -38,11 +38,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 #DataFlair
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
 EMAIL_USE_TLS = True
-EMAIL_PORT = 587
+EMAIL_HOST = "smtp.gmail.com"
 EMAIL_HOST_USER = "ECG.IITH.API@gmail.com"
 EMAIL_HOST_PASSWORD = "IITHECG@2020"
+EMAIL_PORT = 587
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
